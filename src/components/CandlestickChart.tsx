@@ -12,13 +12,15 @@ type Candle = {
 };
 
 export const CandlestickChart: React.FC = () => {
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const [candles, setCandles] = useState<Candle[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:8000/candles/xauusd");
+        const res = await fetch(`${API_URL}/candles/xauusd`);
         const text = await res.text();
 
         const parsed: Candle[] = text
