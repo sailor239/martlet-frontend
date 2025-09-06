@@ -5,7 +5,7 @@ function App() {
   return (
     <div className="App">
       <h1>XAUUSD</h1>
-      <CandlestickChart />
+      <CandlestickChart ticker="xauusd" timeframe="5min" />
     </div>
   );
 }

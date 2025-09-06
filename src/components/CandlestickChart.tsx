@@ -1,97 +1,66 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Plot from "react-plotly.js";
 import { MantineProvider, Card, Text, Loader, Center } from "@mantine/core";
-import "@mantine/core/styles.css"; // Mantine global styles
+import { useCandles } from "./useCandles";
+import type { Candle } from "./useCandles";
 
-type Candle = {
-  timestamp: string;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-};
+interface CandlestickChartProps {
+  ticker: string;
+  timeframe: string;
+  apiUrl?: string;
+}
 
-export const CandlestickChart: React.FC = () => {
-  const API_URL = import.meta.env.VITE_API_URL;
+export const CandlestickChart: React.FC<CandlestickChartProps> = ({
+  ticker,
+  timeframe,
+  apiUrl = import.meta.env.VITE_API_URL,
+}) => {
+  const { data: candles, isLoading, error } = useCandles(ticker, timeframe, apiUrl);
 
-  const [candles, setCandles] = useState<Candle[]>([]);
-  const [loading, setLoading] = useState(true);
+  if (isLoading) {
+    return (
+      <Center style={{ height: "60vh" }}>
+        <Loader size="xl" variant="dots" />
+      </Center>
+    );
+  }
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch(`${API_URL}/candles/xauusd`);
-        const text = await res.text();
+  if (error || !candles || candles.length === 0) {
+    return <Text c="red">Failed to load candles or no data available</Text>;
+  }
 
-        const parsed: Candle[] = text
-          .trim()
-          .split("\n")
-          .map((line) => {
-            const obj = JSON.parse(line);
-            return {
-              timestamp: obj.timestamp,
-              open: parseFloat(obj.open),
-              high: parseFloat(obj.high),
-              low: parseFloat(obj.low),
-              close: parseFloat(obj.close),
-            };
-          })
-          .sort(
-            (a, b) =>
-              new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-          );
-
-        setCandles(parsed);
-      } catch (err) {
-        console.error("Failed to fetch candles:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+  const latestTradingDate = candles[0]?.trading_date ?? "";
 
   return (
     <MantineProvider>
       <Card shadow="sm" padding="lg" radius="md" style={{ width: "80vw", height: "60vh" }}>
         <Text
           component="h2"
-          style={{
-            fontWeight: 500,
-            fontSize: 20,
-            marginBottom: 16,
-          }}
+          style={{ fontWeight: 500, fontSize: 20, marginBottom: 16 }}
         >
-          Candlestick Chart
+          Candlestick Chart - {latestTradingDate}
         </Text>
 
-        {loading ? (
-          <Center style={{ height: "100%" }}>
-            <Loader size="xl" variant="dots" />
-          </Center>
-        ) : (
-          <Plot
-            data={[
-              {
-                x: candles.map((c) => c.timestamp),
-                open: candles.map((c) => c.open),
-                high: candles.map((c) => c.high),
-                low: candles.map((c) => c.low),
-                close: candles.map((c) => c.close),
-                type: "candlestick",
-              },
-            ]}
-            layout={{
-              autosize: true,
-              margin: { l: 60, r: 10, t: 40, b: 40 },
-              xaxis: { rangeslider: { visible: false }, type: "date" },
-              yaxis: { autorange: true },
-            }}
-            style={{ width: "100%", height: "100%" }}
-            useResizeHandler={true}
-          />
-        )}
+        <Plot
+          data={[
+            {
+              x: candles.map((c: Candle) => c.timestamp_sgt),
+              open: candles.map((c: Candle) => c.open),
+              high: candles.map((c: Candle) => c.high),
+              low: candles.map((c: Candle) => c.low),
+              close: candles.map((c: Candle) => c.close),
+              type: "candlestick",
+            },
+          ]}
+          layout={{
+            autosize: true,
+            margin: { l: 60, r: 10, t: 40, b: 40 },
+            xaxis: { rangeslider: { visible: false }, type: "date" },
+            yaxis: { autorange: true },
+          }}
+          style={{ width: "100%", height: "100%" }}
+          useResizeHandler={true}
+        />
       </Card>
     </MantineProvider>
   );
