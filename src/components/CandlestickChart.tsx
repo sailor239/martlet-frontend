@@ -2,7 +2,6 @@ import React from "react";
 import Plot from "react-plotly.js";
 import { MantineProvider, Card, Text, Loader, Center } from "@mantine/core";
 import { useCandles } from "./useCandles";
-import type { Candle } from "./useCandles";
 
 interface CandlestickChartProps {
   ticker: string;
@@ -128,6 +127,8 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({
               close: candles.map((c) => c.close),
               type: "candlestick",
               name: "Price",
+              increasing: { line: { color: "green", width: 1.5 }, fillcolor: "white" }, // hollow up with green border
+              decreasing: { line: { color: "red", width: 1.5 }, fillcolor: "red" },      // solid down
             },
             emaTrace,
           ]}
