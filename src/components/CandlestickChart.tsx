@@ -1,11 +1,19 @@
-import React from "react";
+import React, { useState } from "react";
 import Plot from "react-plotly.js";
-import { MantineProvider, Card, Text, Loader, Center } from "@mantine/core";
+import {
+  MantineProvider,
+  Card,
+  Text,
+  Loader,
+  Center,
+  Group,
+  Select,
+  SimpleGrid,
+} from "@mantine/core";
+import { DatePickerInput } from "@mantine/dates";
 import { useCandles } from "./useCandles";
 
 interface CandlestickChartProps {
-  ticker: string;
-  timeframe: string;
   apiUrl?: string;
 }
 
@@ -28,7 +36,7 @@ function makeLineAndLabel(
       line: { color, width: 1.5, dash: "dashdot" },
     },
     annotation: {
-      x: 0, // left edge
+      x: 0,
       xref: "paper",
       y,
       yref: "y",
@@ -45,11 +53,19 @@ function makeLineAndLabel(
 }
 
 export const CandlestickChart: React.FC<CandlestickChartProps> = ({
-  ticker,
-  timeframe,
   apiUrl = import.meta.env.VITE_API_URL,
 }) => {
-  const { data: candles, isLoading, error } = useCandles(ticker, timeframe, apiUrl);
+  // --- filter state ---
+  const [ticker, setTicker] = useState<string>("xauusd");
+  const [timeframe, setTimeframe] = useState<string>("5min");
+  const [tradingDate, setTradingDate] = useState<Date | null>(new Date());
+
+  const { data: candles, isLoading, error } = useCandles(
+    ticker,
+    timeframe,
+    apiUrl,
+    tradingDate
+  );
 
   if (isLoading) {
     return (
@@ -105,15 +121,55 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({
     x1: xVals[xVals.length - 1],
     y0: prevDayLow,
     y1: prevDayHigh,
-    fillcolor: "rgba(173,216,230,0.2)", // light blue
+    fillcolor: "rgba(173,216,230,0.2)",
     line: { width: 0 },
     layer: "below",
   };
 
   return (
     <MantineProvider>
-      <Card shadow="sm" padding="lg" radius="md" style={{ width: "80vw", height: "60vh" }}>
-        <Text component="h2" style={{ fontWeight: 500, fontSize: 20, marginBottom: 16 }}>
+      <Card
+        shadow="sm"
+        padding="lg"
+        radius="md"
+        style={{
+          width: "90vw",
+          height: "80vh",
+          minHeight: 500, // ensures enough vertical space
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        {/* --- Filters --- */}
+        <Group mb="md" gap="md">
+          <Select
+            label="Ticker"
+            value={ticker}
+            onChange={(val) => val && setTicker(val)}
+            data={["xauusd"]}
+            w={120}
+          />
+          <Select
+            label="Timeframe"
+            value={timeframe}
+            onChange={(val) => val && setTimeframe(val)}
+            data={[
+              { value: "5min", label: "5 Minutes" },
+            ]}
+            w={120}
+          />
+          <DatePickerInput
+            label="Trading Date"
+            placeholder="Pick a date"
+            value={tradingDate}
+            onChange={(val) => setTradingDate(val ? new Date(val) : null)}
+            clearable
+            w={180}
+          />
+        </Group>
+
+        {/* --- Chart --- */}
+        <Text size="xl" fw={500} mb="md">
           Candlestick Chart - {latestTradingDate}
         </Text>
 
@@ -127,8 +183,14 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({
               close: candles.map((c) => c.close),
               type: "candlestick",
               name: "Price",
-              increasing: { line: { color: "green", width: 1.5 }, fillcolor: "white" }, // hollow up with green border
-              decreasing: { line: { color: "red", width: 1.5 }, fillcolor: "red" },      // solid down
+              increasing: {
+                line: { color: "green", width: 1.5 },
+                fillcolor: "white",
+              }, // hollow up
+              decreasing: {
+                line: { color: "red", width: 1.5 },
+                fillcolor: "red",
+              }, // solid down
             },
             emaTrace,
           ]}

@@ -17,12 +17,19 @@ export type Candle = {
 export const fetchCandles = async (
   ticker: string,
   timeframe: string,
-  apiUrl: string
+  apiUrl: string,
+  tradingDate?: Date | null
 ): Promise<Candle[]> => {
+  const body: Record<string, any> = { ticker, timeframe };
+  if (tradingDate) {
+    // Format to YYYY-MM-DD (assuming backend expects this format)
+    body.trading_date = tradingDate.toISOString().split("T")[0];
+  }
+
   const res = await fetch(`${apiUrl}/candles/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ticker, timeframe }),
+    body: JSON.stringify(body),
   });
 
   if (!res.ok) {
@@ -35,15 +42,24 @@ export const fetchCandles = async (
     .trim()
     .split("\n")
     .map((line) => JSON.parse(line))
-    .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+    .sort(
+      (a, b) =>
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    );
 
   return candles;
 };
 
 // React Query hook using options-object syntax (v5 compliant)
-export const useCandles = (ticker: string, timeframe: string, apiUrl: string) => {
+export const useCandles = (
+  ticker: string,
+  timeframe: string,
+  apiUrl: string,
+  tradingDate?: Date | null
+) => {
   return useQuery<Candle[], Error>({
-    queryKey: ["candles", ticker, timeframe],
-    queryFn: () => fetchCandles(ticker, timeframe, apiUrl),
+    queryKey: ["candles", ticker, timeframe, tradingDate?.toISOString()],
+    queryFn: () => fetchCandles(ticker, timeframe, apiUrl, tradingDate),
+    enabled: !!ticker && !!timeframe, // only run if required filters are set
   });
 };
