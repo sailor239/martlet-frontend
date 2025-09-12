@@ -59,70 +59,12 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({
   const [timeframe, setTimeframe] = useState<string>("5min");
   const [tradingDate, setTradingDate] = useState<Date | null>(new Date());
 
-  const { data: candles, isLoading, error } = useCandles(
+  const { data: candles = [], isLoading, error, noData } = useCandles(
     ticker,
     timeframe,
     apiUrl,
     tradingDate
   );
-
-  if (isLoading) {
-    return (
-      <Center style={{ height: "60vh" }}>
-        <Loader size="xl" variant="dots" />
-      </Center>
-    );
-  }
-
-  if (error || !candles || candles.length === 0) {
-    return <Text c="red">Failed to load candles or no data available</Text>;
-  }
-
-  const prevDayHigh = candles[0]?.prev_day_high ?? 0;
-  const prevDayLow = candles[0]?.prev_day_low ?? 0;
-
-  const xVals = candles.map((c) => c.timestamp_sgt);
-
-  // --- EMA20 trace ---
-  const emaTrace = {
-    x: xVals.filter((_, i) => candles[i].ema20 != null),
-    y: candles.filter((c) => c.ema20 != null).map((c) => c.ema20!),
-    type: "scatter",
-    mode: "lines",
-    line: { color: "purple", width: 1.5 },
-    name: "EMA20",
-    hoverinfo: "y+name",
-  };
-
-  // --- Previous day high/low lines + labels ---
-  const { shape: highLine, annotation: highAnnotation } = makeLineAndLabel(
-    prevDayHigh,
-    "green",
-    "Prev Day High",
-    xVals[0],
-    xVals[xVals.length - 1]
-  );
-  const { shape: lowLine, annotation: lowAnnotation } = makeLineAndLabel(
-    prevDayLow,
-    "red",
-    "Prev Day Low",
-    xVals[0],
-    xVals[xVals.length - 1]
-  );
-
-  // --- Shaded previous day range ---
-  const rangeShape = {
-    type: "rect",
-    xref: "x",
-    yref: "y",
-    x0: xVals[0],
-    x1: xVals[xVals.length - 1],
-    y0: prevDayLow,
-    y1: prevDayHigh,
-    fillcolor: "rgba(173,216,230,0.2)",
-    line: { width: 0 },
-    layer: "below",
-  };
 
   return (
     <MantineProvider>
@@ -133,7 +75,7 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({
         style={{
           width: "90vw",
           height: "80vh",
-          minHeight: 600, // ensures enough vertical space
+          minHeight: 600,
           display: "flex",
           flexDirection: "column",
         }}
@@ -144,9 +86,7 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({
           <Select
             value={ticker}
             onChange={(val) => val && setTicker(val)}
-            data={[
-              { value: "xauusd", label: "XAUUSD" }
-            ]}
+            data={[{ value: "xauusd", label: "XAUUSD" }]}
             w={120}
           />
           <Text size="sm" fw={500}>Timeframe:</Text>
@@ -164,27 +104,42 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({
           />
         </Group>
 
-        {/* --- Chart --- */}
+        {/* --- Chart or messages --- */}
         <Text size="xl" fw={500} mb="md">
-          {tradingDate ? tradingDate.toLocaleDateString('en-GB', { 
-            weekday: 'short', 
-            day: '2-digit', 
-            month: 'short', 
-            year: 'numeric' 
-          }) : ""}
+          {tradingDate
+            ? tradingDate.toLocaleDateString("en-GB", {
+                weekday: "short",
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })
+            : ""}
         </Text>
 
-        {error || !candles || candles.length === 0 ? (
+        {isLoading ? (
+          <Center style={{ flex: 1 }}>
+            <Loader size="xl" variant="dots" />
+          </Center>
+        ) : error ? (
           <Center style={{ flex: 1 }}>
             <Text c="red" size="lg">
-              No candle data available for the selected filters
+              Failed to load candles: {error.message}
+            </Text>
+          </Center>
+        ) : noData ? (
+          <Center style={{ flex: 1 }}>
+            <Text c="dimmed" size="lg">
+              No data available for{" "}
+              {tradingDate
+                ? tradingDate.toLocaleDateString()
+                : "the selected date"}
             </Text>
           </Center>
         ) : (
           <Plot
             data={[
               {
-                x: xVals,
+                x: candles.map((c) => c.timestamp_sgt),
                 open: candles.map((c) => c.open),
                 high: candles.map((c) => c.high),
                 low: candles.map((c) => c.low),
@@ -194,21 +149,71 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({
                 increasing: {
                   line: { color: "green", width: 1.5 },
                   fillcolor: "white",
-                }, // hollow up
+                },
                 decreasing: {
                   line: { color: "red", width: 1.5 },
                   fillcolor: "red",
-                }, // solid down
+                },
               },
-              emaTrace,
+              {
+                x: candles.filter((c) => c.ema20 != null).map((c) => c.timestamp_sgt),
+                y: candles.filter((c) => c.ema20 != null).map((c) => c.ema20!),
+                type: "scatter",
+                mode: "lines",
+                line: { color: "purple", width: 1.5 },
+                name: "EMA20",
+                hoverinfo: "y+name",
+              },
             ]}
             layout={{
               autosize: true,
               margin: { l: 160, r: 10, t: 40, b: 40 },
               xaxis: { rangeslider: { visible: false }, type: "date" },
               yaxis: { autorange: true },
-              shapes: [highLine, lowLine, rangeShape],
-              annotations: [highAnnotation, lowAnnotation],
+              shapes: [
+                makeLineAndLabel(
+                  candles[0]?.prev_day_high ?? 0,
+                  "green",
+                  "Prev Day High",
+                  candles[0].timestamp_sgt,
+                  candles[candles.length - 1].timestamp_sgt
+                ).shape,
+                makeLineAndLabel(
+                  candles[0]?.prev_day_low ?? 0,
+                  "red",
+                  "Prev Day Low",
+                  candles[0].timestamp_sgt,
+                  candles[candles.length - 1].timestamp_sgt
+                ).shape,
+                {
+                  type: "rect",
+                  xref: "x",
+                  yref: "y",
+                  x0: candles[0].timestamp_sgt,
+                  x1: candles[candles.length - 1].timestamp_sgt,
+                  y0: candles[0]?.prev_day_low ?? 0,
+                  y1: candles[0]?.prev_day_high ?? 0,
+                  fillcolor: "rgba(173,216,230,0.2)",
+                  line: { width: 0 },
+                  layer: "below",
+                },
+              ],
+              annotations: [
+                makeLineAndLabel(
+                  candles[0]?.prev_day_high ?? 0,
+                  "green",
+                  "Prev Day High",
+                  candles[0].timestamp_sgt,
+                  candles[candles.length - 1].timestamp_sgt
+                ).annotation,
+                makeLineAndLabel(
+                  candles[0]?.prev_day_low ?? 0,
+                  "red",
+                  "Prev Day Low",
+                  candles[0].timestamp_sgt,
+                  candles[candles.length - 1].timestamp_sgt
+                ).annotation,
+              ],
             }}
             style={{ width: "100%", height: "100%" }}
             useResizeHandler={true}

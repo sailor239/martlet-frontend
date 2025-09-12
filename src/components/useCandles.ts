@@ -38,6 +38,10 @@ export const fetchCandles = async (
 
   const text = await res.text();
 
+  if (!text.trim()) {
+    return []; // empty response → no data
+  }
+
   const candles: Candle[] = text
     .trim()
     .split("\n")
@@ -57,9 +61,14 @@ export const useCandles = (
   apiUrl: string,
   tradingDate?: Date | null
 ) => {
-  return useQuery<Candle[], Error>({
+  const query = useQuery<Candle[], Error>({
     queryKey: ["candles", ticker, timeframe, tradingDate?.toISOString()],
     queryFn: () => fetchCandles(ticker, timeframe, apiUrl, tradingDate),
     enabled: !!ticker && !!timeframe, // only run if required filters are set
   });
+
+  // add a derived flag for "no data"
+  const noData = !query.isLoading && !query.error && (query.data?.length ?? 0) === 0;
+
+  return { ...query, noData };
 };
