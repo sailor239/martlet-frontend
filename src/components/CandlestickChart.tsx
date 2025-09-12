@@ -8,7 +8,6 @@ import {
   Center,
   Group,
   Select,
-  SimpleGrid,
 } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import { useCandles } from "./useCandles";
@@ -36,11 +35,11 @@ function makeLineAndLabel(
       line: { color, width: 1.5, dash: "dashdot" },
     },
     annotation: {
-      x: 0,
+      x: -0.05,
       xref: "paper",
       y,
       yref: "y",
-      text: label,
+      text: `${label}<br>${Number(y).toFixed(2)}`,
       showarrow: false,
       font: { color, size: 12 },
       xanchor: "right",
@@ -79,7 +78,6 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({
     return <Text c="red">Failed to load candles or no data available</Text>;
   }
 
-  const latestTradingDate = candles[0]?.trading_date ?? "";
   const prevDayHigh = candles[0]?.prev_day_high ?? 0;
   const prevDayLow = candles[0]?.prev_day_low ?? 0;
 
@@ -135,76 +133,87 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({
         style={{
           width: "90vw",
           height: "80vh",
-          minHeight: 500, // ensures enough vertical space
+          minHeight: 600, // ensures enough vertical space
           display: "flex",
           flexDirection: "column",
         }}
       >
         {/* --- Filters --- */}
-        <Group mb="md" gap="md">
+        <Group mb="md" gap="md" align="center">
+          <Text size="sm" fw={500}>Ticker:</Text>
           <Select
-            label="Ticker"
             value={ticker}
             onChange={(val) => val && setTicker(val)}
-            data={["xauusd"]}
-            w={120}
-          />
-          <Select
-            label="Timeframe"
-            value={timeframe}
-            onChange={(val) => val && setTimeframe(val)}
             data={[
-              { value: "5min", label: "5 Minutes" },
+              { value: "xauusd", label: "XAUUSD" }
             ]}
             w={120}
           />
+          <Text size="sm" fw={500}>Timeframe:</Text>
+          <Select
+            value={timeframe}
+            onChange={(val) => val && setTimeframe(val)}
+            data={[{ value: "5min", label: "5 Minutes" }]}
+            w={120}
+          />
+          <Text size="sm" fw={500}>Trading Date:</Text>
           <DatePickerInput
-            label="Trading Date"
-            placeholder="Pick a date"
             value={tradingDate}
             onChange={(val) => setTradingDate(val ? new Date(val) : null)}
-            clearable
             w={180}
           />
         </Group>
 
         {/* --- Chart --- */}
         <Text size="xl" fw={500} mb="md">
-          Candlestick Chart - {latestTradingDate}
+          {tradingDate ? tradingDate.toLocaleDateString('en-GB', { 
+            weekday: 'short', 
+            day: '2-digit', 
+            month: 'short', 
+            year: 'numeric' 
+          }) : ""}
         </Text>
 
-        <Plot
-          data={[
-            {
-              x: xVals,
-              open: candles.map((c) => c.open),
-              high: candles.map((c) => c.high),
-              low: candles.map((c) => c.low),
-              close: candles.map((c) => c.close),
-              type: "candlestick",
-              name: "Price",
-              increasing: {
-                line: { color: "green", width: 1.5 },
-                fillcolor: "white",
-              }, // hollow up
-              decreasing: {
-                line: { color: "red", width: 1.5 },
-                fillcolor: "red",
-              }, // solid down
-            },
-            emaTrace,
-          ]}
-          layout={{
-            autosize: true,
-            margin: { l: 120, r: 10, t: 40, b: 40 },
-            xaxis: { rangeslider: { visible: false }, type: "date" },
-            yaxis: { autorange: true },
-            shapes: [highLine, lowLine, rangeShape],
-            annotations: [highAnnotation, lowAnnotation],
-          }}
-          style={{ width: "100%", height: "100%" }}
-          useResizeHandler={true}
-        />
+        {error || !candles || candles.length === 0 ? (
+          <Center style={{ flex: 1 }}>
+            <Text c="red" size="lg">
+              No candle data available for the selected filters
+            </Text>
+          </Center>
+        ) : (
+          <Plot
+            data={[
+              {
+                x: xVals,
+                open: candles.map((c) => c.open),
+                high: candles.map((c) => c.high),
+                low: candles.map((c) => c.low),
+                close: candles.map((c) => c.close),
+                type: "candlestick",
+                name: "Price",
+                increasing: {
+                  line: { color: "green", width: 1.5 },
+                  fillcolor: "white",
+                }, // hollow up
+                decreasing: {
+                  line: { color: "red", width: 1.5 },
+                  fillcolor: "red",
+                }, // solid down
+              },
+              emaTrace,
+            ]}
+            layout={{
+              autosize: true,
+              margin: { l: 160, r: 10, t: 40, b: 40 },
+              xaxis: { rangeslider: { visible: false }, type: "date" },
+              yaxis: { autorange: true },
+              shapes: [highLine, lowLine, rangeShape],
+              annotations: [highAnnotation, lowAnnotation],
+            }}
+            style={{ width: "100%", height: "100%" }}
+            useResizeHandler={true}
+          />
+        )}
       </Card>
     </MantineProvider>
   );

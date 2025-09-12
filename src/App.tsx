@@ -6,7 +6,6 @@ import '@mantine/dates/styles.css';
 function App() {
   return (
     <div className="App">
-      <h1>XAUUSD</h1>
       <CandlestickChart />
     </div>
   );
