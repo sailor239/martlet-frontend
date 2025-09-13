@@ -1,19 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
+import type { Candle } from "../../../types/candle";
 
-export type Candle = {
-  timestamp: string;
-  timestamp_sgt: string;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  trading_date: string;
-  ema20: number | null;
-  prev_day_high: number | null;
-  prev_day_low: number | null;
-};
-
-// Fetch function for the POST /candles/ endpoint
+// Fetch function for the POST /intraday/ endpoint
 export const fetchIntradayData = async (
   ticker: string,
   timeframe: string,
