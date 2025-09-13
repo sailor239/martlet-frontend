@@ -10,7 +10,7 @@ import {
   Select,
 } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
-import { useCandles } from "./useCandles";
+import { useIntradayData } from "./useIntradayData";
 
 interface CandlestickChartProps {
   apiUrl?: string;
@@ -59,11 +59,11 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({
   const [timeframe, setTimeframe] = useState<string>("5min");
   const [tradingDate, setTradingDate] = useState<Date | null>(new Date());
 
-  const { data: candles = [], isLoading, error, noData } = useCandles(
+  const { data: candles = [], isLoading, error, noData } = useIntradayData(
     ticker,
     timeframe,
-    apiUrl,
-    tradingDate
+    tradingDate,
+    apiUrl
   );
 
   return (
@@ -97,11 +97,21 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({
             w={120}
           />
           <Text size="sm" fw={500}>Trading Date:</Text>
-          <DatePickerInput
-            value={tradingDate}
-            onChange={(val) => setTradingDate(val ? new Date(val) : null)}
-            w={180}
-          />
+          <Group gap="xs" align="center">
+            <DatePickerInput
+              value={tradingDate}
+              onChange={(val) => setTradingDate(val ? new Date(val) : null)}
+              w={180}
+            />
+            <Text
+              size="sm"
+              c="blue"
+              style={{ cursor: "pointer", userSelect: "none" }}
+              onClick={() => setTradingDate(new Date())}
+            >
+              Today
+            </Text>
+          </Group>
         </Group>
 
         {/* --- Chart or messages --- */}
@@ -131,7 +141,11 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({
             <Text c="dimmed" size="lg">
               No data available for{" "}
               {tradingDate
-                ? tradingDate.toLocaleDateString()
+                ? tradingDate.toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })
                 : "the selected date"}
             </Text>
           </Center>
