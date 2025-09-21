@@ -5,40 +5,49 @@ import { DateTimePicker } from "@mantine/dates";
 import { useAddTrade } from "./hooks";
 
 export const TradeForm: React.FC = () => {
-  const [symbol, setSymbol] = useState("XAUUSD");
-  const [side, setSide] = useState("long");
-  const [entryPrice, setEntryPrice] = useState<number | "">(0);
+  const [ticker, setTicker] = useState("xauusd");
+  const [direction, setDirection] = useState("long");
+  const [size, setSize] = useState<number | "">("");
+  const [entryPrice, setEntryPrice] = useState<number | "">("");
   const [exitPrice, setExitPrice] = useState<number | "">("");
-  const [entryTime, setEntryTime] = useState<Date | null>(new Date());
+  const [entryTime, setEntryTime] = useState<Date | null>(null);
   const [exitTime, setExitTime] = useState<Date | null>(null);
 
   const addTrade = useAddTrade();
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    addTrade.mutate({
-      symbol,
-      side,
-      entry_price: entryPrice,
-      exit_price: exitPrice || null,
-      entry_time: entryTime?.toISOString(),
-      exit_time: exitTime?.toISOString() ?? null,
-    });
-  };
+  e.preventDefault();
+
+  // --- validate required fields ---
+  if (!ticker || !direction || entryPrice === "" || size === "" || !entryTime) {
+    alert("Please fill all required fields");
+    return;
+  }
+
+  addTrade.mutate({
+    ticker: ticker,
+    direction: direction,
+    size: Number(size),                     // always a number
+    entry_price: Number(entryPrice),        // always a number
+    exit_price: exitPrice === "" ? null : Number(exitPrice),  // optional
+    entry_time: entryTime.toISOString(),    // always string ISO
+    exit_time: exitTime ? exitTime.toISOString() : null, // optional
+  });
+};
 
   return (
     <form onSubmit={handleSubmit}>
       <TextInput
-        label="Symbol"
-        value={symbol}
-        onChange={(e) => setSymbol(e.currentTarget.value)}
+        label="Ticker"
+        value={ticker}
+        onChange={(e) => setTicker(e.currentTarget.value)}
         required
       />
 
       <Select
-        label="Side"
-        value={side}
-        onChange={(val) => val && setSide(val)}
+        label="Direction"
+        value={direction}
+        onChange={(val) => val && setDirection(val)}
         data={[
           { value: "long", label: "Long" },
           { value: "short", label: "Short" },
@@ -48,9 +57,16 @@ export const TradeForm: React.FC = () => {
       />
 
       <NumberInput
+        label="Size"
+        value={size}                      // number | ""
+        onChange={(val) => setSize(typeof val === "number" ? val : "")} // normalize to number or ""
+        placeholder="Enter trade size"
+      />
+
+      <NumberInput
         label="Entry Price"
         value={entryPrice}
-        onChange={setEntryPrice}
+        onChange={(val) => setEntryPrice(typeof val === "number" ? val : "")}
         required
         mt="sm"
       />
@@ -58,14 +74,23 @@ export const TradeForm: React.FC = () => {
       <NumberInput
         label="Exit Price"
         value={exitPrice}
-        onChange={setExitPrice}
+        onChange={(val) => setExitPrice(typeof val === "number" ? val : "")}
         mt="sm"
       />
 
       <DateTimePicker
         label="Entry Time"
         value={entryTime}
-        onChange={setEntryTime}
+        onChange={(val: string | null) => {
+          if (val) {
+            const date = new Date(val);
+            if (!isNaN(date.getTime())) {
+              setEntryTime(date);
+            }
+          } else {
+            setEntryTime(null);
+          }
+        }}
         required
         mt="sm"
       />
@@ -73,7 +98,17 @@ export const TradeForm: React.FC = () => {
       <DateTimePicker
         label="Exit Time"
         value={exitTime}
-        onChange={setExitTime}
+        onChange={(val: string | null) => {
+          if (val) {
+            const date = new Date(val);
+            if (!isNaN(date.getTime())) {
+              setExitTime(date);
+            }
+          } else {
+            setExitTime(null);
+          }
+        }}
+        required
         mt="sm"
       />
 

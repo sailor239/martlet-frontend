@@ -13,7 +13,7 @@ export const TradeList: React.FC<{ trades: any[] }> = ({ trades }) => {
         <li key={trade.id}>
           <Card shadow="xs" padding="sm" radius="md" withBorder mb="sm">
             <Text fw={500}>
-              {trade.symbol} ({trade.side})
+              {trade.ticker} ({trade.direction})
             </Text>
             <Text size="sm" c="dimmed">
               {new Date(trade.entry_time).toLocaleString()} →{" "}
