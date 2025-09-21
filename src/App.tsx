@@ -4,8 +4,6 @@ import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import TopMenu from "./components/layout/TopMenu";
 import Home from "./pages/Home/Home";
-import { Intraday } from "./pages/Intraday/Intraday";
-import { Backtest } from "./pages/Backtest/Backtest";
 
 function App() {
   return (

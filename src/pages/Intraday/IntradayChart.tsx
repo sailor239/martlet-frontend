@@ -1,5 +1,5 @@
 import Plot from "react-plotly.js";
-import type { Candle } from "../../../types/candle";
+import type { Candle } from "../../types/candle";
 
 interface Props {
   candles: Candle[];
