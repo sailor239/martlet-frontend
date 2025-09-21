@@ -3,8 +3,9 @@ import { MantineProvider } from "@mantine/core";
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import TopMenu from "./components/layout/TopMenu";
-import { Intraday } from "./components/pages/Intraday/Intraday";
-import Backtest from "./components/pages/Backtest/Backtest";
+import Home from "./pages/Home/Home";
+import { Intraday } from "./pages/Intraday/Intraday";
+import { Backtest } from "./pages/Backtest/Backtest";
 
 function App() {
   return (
@@ -13,9 +14,10 @@ function App() {
         <TopMenu /> {/* Visible on all pages */}
 
         <Routes>
-          <Route path="/intraday" element={<Intraday />} />
-          <Route path="/backtest" element={<Backtest />} />
-          {/* <Route path="*" element={<Intraday />} /> */}
+          <Route path="/" element={<Home />} />
+          {/* <Route path="/intraday" element={<Intraday />} />
+          <Route path="/backtest" element={<Backtest />} /> */}
+          <Route path="*" element={<div>Page not found</div>} />
         </Routes>
       </BrowserRouter>
     </MantineProvider>

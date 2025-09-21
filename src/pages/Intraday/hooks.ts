@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import type { Candle } from "../../../types/candle";
+import type { Candle } from "../../types/candle";
 
 // Fetch function for the POST /intraday/ endpoint
 export const fetchIntradayData = async (
