@@ -4,11 +4,6 @@ import { Button, Group, NumberInput, Select, TextInput } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import { useAddTrade } from "./hooks";
 
-function getNowSGT(): Date {
-  const now = new Date();
-  return new Date(now.getTime());
-}
-
 export const TradeForm: React.FC = () => {
   const [ticker, setTicker] = useState("xauusd");
   const [direction, setDirection] = useState("long");
