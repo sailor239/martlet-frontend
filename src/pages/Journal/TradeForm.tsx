@@ -4,42 +4,47 @@ import { Button, Group, NumberInput, Select, TextInput } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import { useAddTrade } from "./hooks";
 
+function getNowSGT(): Date {
+  const now = new Date();
+  return new Date(now.getTime());
+}
+
 export const TradeForm: React.FC = () => {
   const [ticker, setTicker] = useState("xauusd");
   const [direction, setDirection] = useState("long");
-  const [size, setSize] = useState<number | "">("");
+  const [size, setSize] = useState<number>(0.01);
   const [entryPrice, setEntryPrice] = useState<number | "">("");
   const [exitPrice, setExitPrice] = useState<number | "">("");
-  const [entryTime, setEntryTime] = useState<Date | null>(null);
-  const [exitTime, setExitTime] = useState<Date | null>(null);
+  const [entryTime, setEntryTime] = useState<Date | null>(new Date());
+  const [exitTime, setExitTime] = useState<Date | null>(new Date());
 
   const addTrade = useAddTrade();
 
   const handleSubmit = (e: React.FormEvent) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  // --- validate required fields ---
-  if (!ticker || !direction || entryPrice === "" || size === "" || !entryTime) {
-    alert("Please fill all required fields");
-    return;
-  }
+    // --- validate required fields ---
+    if (!ticker || !direction || entryPrice === "" || !entryTime) {
+      alert("Please fill all required fields");
+      return;
+    }
 
-  addTrade.mutate({
-    ticker: ticker,
-    direction: direction,
-    size: Number(size),                     // always a number
-    entry_price: Number(entryPrice),        // always a number
-    exit_price: exitPrice === "" ? null : Number(exitPrice),  // optional
-    entry_time: entryTime.toISOString(),    // always string ISO
-    exit_time: exitTime ? exitTime.toISOString() : null, // optional
-  });
-};
+    addTrade.mutate({
+      ticker: ticker.toLowerCase(),
+      direction: direction.toLowerCase(),
+      size: Number(size),                     // always a number
+      entry_price: Number(entryPrice),        // always a number
+      exit_price: exitPrice === "" ? null : Number(exitPrice),  // optional
+      entry_time: entryTime.toISOString(),    // always string ISO
+      exit_time: exitTime ? exitTime.toISOString() : null, // optional
+    });
+  };
 
   return (
     <form onSubmit={handleSubmit}>
       <TextInput
         label="Ticker"
-        value={ticker}
+        value={ticker.toUpperCase()}
         onChange={(e) => setTicker(e.currentTarget.value)}
         required
       />
@@ -58,9 +63,10 @@ export const TradeForm: React.FC = () => {
 
       <NumberInput
         label="Size"
-        value={size}                      // number | ""
-        onChange={(val) => setSize(typeof val === "number" ? val : "")} // normalize to number or ""
-        placeholder="Enter trade size"
+        value={size}
+        onChange={(val) => setSize(typeof val === "number" ? val : 0.01)} // fallback to 0.01 if cleared
+        step={0.01}
+        min={0.01}
       />
 
       <NumberInput
@@ -75,6 +81,7 @@ export const TradeForm: React.FC = () => {
         label="Exit Price"
         value={exitPrice}
         onChange={(val) => setExitPrice(typeof val === "number" ? val : "")}
+        required
         mt="sm"
       />
 
