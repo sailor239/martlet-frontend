@@ -1,8 +1,10 @@
 import Plot from "react-plotly.js";
 import type { Candle } from "../../types/candle";
+import type { Trade } from "./hooks";
 
 interface Props {
   candles: Candle[];
+  trades?: Trade[];
 }
 
 function makeLineAndLabel(
@@ -40,7 +42,7 @@ function makeLineAndLabel(
   };
 }
 
-export default function IntradayChart({ candles }: Props) {
+export default function IntradayChart({ candles, trades = [] }: Props) {
   if (!candles.length) return null;
 
   const x0 = candles[0].timestamp_sgt;
@@ -68,6 +70,44 @@ export default function IntradayChart({ candles }: Props) {
           line: { color: "purple", width: 1.5 },
           name: "EMA20",
           hoverinfo: "y+name",
+        },
+        // Entry markers
+        {
+          x: trades.map((t) => t.entry_time),
+          y: trades.map((t) => t.entry_price),
+          text: trades.map((t) => `${t.direction.toUpperCase()} x ${t.size}`),
+          mode: "markers+text",
+          textposition: "top center",
+          name: "Entries",
+          marker: {
+            symbol: trades.map((t) =>
+              t.direction === "long" ? "triangle-up" : "triangle-down"
+            ),
+            size: 14,
+            color: trades.map((t) =>
+              t.direction === "long" ? "green" : "red"
+            ),
+          },
+        },
+        // Exit markers
+        {
+          x: trades.filter((t) => t.exit_time).map((t) => t.exit_time!),
+          y: trades.filter((t) => t.exit_price).map((t) => t.exit_price!),
+          text: trades.filter((t) => t.exit_time).map(() => "Exit"),
+          mode: "markers+text",
+          textposition: "bottom center",
+          name: "Exits",
+          marker: {
+            symbol: "circle",
+            size: 12,
+            color: trades.map((t) => {
+              if (!t.exit_price) return "gray"; // still open
+              const profit = t.direction === "long"
+                ? t.exit_price > t.entry_price
+                : t.exit_price < t.entry_price;
+              return profit ? "green" : "red";
+            })
+          },
         },
       ]}
       layout={{

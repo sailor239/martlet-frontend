@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { MantineProvider, Card, Text, Loader, Center, Group, Select } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import IntradayChart from "./IntradayChart";
-import { useIntradayData } from "./hooks";
+import { useIntradayData, useTrades } from "./hooks";
 
 export const Intraday: React.FC<{ apiUrl?: string }> = ({
   apiUrl = import.meta.env.VITE_API_URL,
@@ -17,6 +17,8 @@ export const Intraday: React.FC<{ apiUrl?: string }> = ({
     tradingDate,
     apiUrl
   );
+
+  const { data: trades = [] } = useTrades(ticker, tradingDate, apiUrl);
 
   return (
     <MantineProvider>
@@ -48,7 +50,7 @@ export const Intraday: React.FC<{ apiUrl?: string }> = ({
         ) : noData ? (
           <Center style={{ flex: 1 }}><Text c="dimmed" size="lg">No data available for {tradingDate?.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</Text></Center>
         ) : (
-          <IntradayChart candles={candles} />
+          <IntradayChart candles={candles} trades={trades} />
         )}
       </Card>
     </MantineProvider>

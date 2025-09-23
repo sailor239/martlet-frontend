@@ -51,3 +51,40 @@ export const useIntradayData = (
 
   return { ...query, noData };
 };
+
+export interface Trade {
+  id: number;
+  ticker: string;
+  direction: "long" | "short";
+  size: number;
+  entry_price: number;
+  exit_price?: number;
+  entry_time: string;
+  exit_time?: string;
+  notes?: string;
+}
+
+export const fetchTrades = async (
+  ticker: string,
+  tradingDate: Date | null,
+  apiUrl: string,
+): Promise<Trade[]> => {
+  if (!tradingDate) return [];
+  const dateStr = tradingDate.toISOString().split("T")[0];
+  const res = await fetch(`${apiUrl}/trades/${ticker}/${dateStr}`);
+  if (!res.ok) throw new Error("Failed to fetch trades");
+  return res.json();
+};
+
+export const useTrades = (
+  ticker: string,
+  tradingDate: Date | null,
+  apiUrl: string,
+) => {
+  return useQuery<Trade[], Error>({
+    queryKey: ["trades", ticker, tradingDate?.toISOString()],
+    queryFn: () => fetchTrades(ticker, tradingDate, apiUrl),
+    enabled: !!ticker && !!tradingDate,
+  });
+};
+
