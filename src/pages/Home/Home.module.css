@@ -1,0 +1,9 @@
+.tab {
+  /* base inactive style (optional) */
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.tab:not([data-active]):hover {
+  background-color: #e6f0ff; /* light blue background */
+  color: #1c7ed6;           /* darker blue text */
+}

@@ -3,6 +3,7 @@ import { Card, Text, Center, Tabs } from "@mantine/core";
 import { Intraday } from "../Intraday/Intraday";
 import { Backtest } from "../Backtest/Backtest";
 import { Journal } from "../Journal/Journal";
+import classes from "./Home.module.css";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<string | null>(null);
@@ -14,6 +15,7 @@ export default function Home() {
       variant="pills"
       radius="md"
       keepMounted={false}
+      classNames={{ tab: classes.tab }}
     >
       <Tabs.List grow>
         <Tabs.Tab value="intraday">Intraday</Tabs.Tab>
