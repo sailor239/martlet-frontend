@@ -22,7 +22,7 @@ export const Intraday: React.FC<{ apiUrl?: string }> = ({
 
   return (
     <MantineProvider>
-      <Card shadow="sm" p="lg" radius="md" style={{ width: "90vw", height: "80vh", minHeight: 600, display: "flex", flexDirection: "column" }}>
+      <Card shadow="sm" p="lg" radius="md" style={{ width: "100%", height: "80vh", minHeight: 600, display: "flex", flexDirection: "column" }}>
         {/* Filters */}
         <Group mb="md" gap="md" align="center">
           <Text size="sm" fw={500}>Ticker:</Text>

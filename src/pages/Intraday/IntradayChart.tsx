@@ -113,6 +113,13 @@ export default function IntradayChart({ candles, trades = [] }: Props) {
       layout={{
         autosize: true,
         margin: { l: 160, r: 10, t: 40, b: 40 },
+        legend: {
+          orientation: "h", // horizontal layout
+          yanchor: "top",
+          y: -0.2, // push below chart
+          xanchor: "center",
+          x: 0.5,
+        },
         xaxis: { rangeslider: { visible: false }, type: "date" },
         yaxis: { autorange: true },
         shapes: [
@@ -138,6 +145,7 @@ export default function IntradayChart({ candles, trades = [] }: Props) {
       }}
       style={{ width: "100%", height: "100%" }}
       useResizeHandler
+      config={{ responsive: true, displayModeBar: false }}
     />
   );
 }
