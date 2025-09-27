@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MantineProvider, Card, Text, Loader, Center, Group, Select } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import IntradayChart from "./IntradayChart";
 import { useIntradayData, useTrades } from "./hooks";
+import { showNotification } from '@mantine/notifications';
 
 export const Intraday: React.FC<{ apiUrl?: string }> = ({
   apiUrl = import.meta.env.VITE_API_URL,
@@ -18,7 +19,97 @@ export const Intraday: React.FC<{ apiUrl?: string }> = ({
     apiUrl
   );
 
-  const { data: trades = [] } = useTrades(ticker, tradingDate, apiUrl);
+  const { data: backendTrades = [] } = useTrades(ticker, tradingDate, apiUrl);
+  const [trades, setTrades] = useState(
+  backendTrades.map((t) => ({
+    ...t,
+    // Convert UTC timestamp to local time for display
+    entry_time: t.entry_time ? new Date(t.entry_time) : null,
+    exit_time: t.exit_time ? new Date(t.exit_time) : null,
+  }))
+);
+
+  // Only update local trades if backend data really changed
+  useEffect(() => {
+  setTrades((prev) => {
+    // simple shallow compare: lengths + ids
+    const prevIds = prev.map((t) => t.id).join(",");
+    const backendIds = backendTrades.map((t) => t.id).join(",");
+    if (prevIds !== backendIds) {
+      return backendTrades.map((t) => ({
+        ...t,
+        entry_time: t.entry_time ? new Date(t.entry_time) : null,
+        exit_time: t.exit_time ? new Date(t.exit_time) : null,
+      }));
+    }
+    return prev; // no update
+  });
+}, [backendTrades]);
+
+  // 1️⃣ Backend save function
+  const saveTrade = async (trade: any) => {
+  // Convert times to UTC ISO string for backend
+  const tradeToSend = {
+    ...trade,
+    entry_time: trade.entry_time ? new Date(trade.entry_time).toISOString() : undefined,
+    exit_time: trade.exit_time ? new Date(trade.exit_time).toISOString() : undefined,
+    ticker: ticker.toLowerCase(),
+  };
+
+  // Convert times to local Date for frontend display
+  const tradeForDisplay = {
+    ...trade,
+    entry_time: trade.entry_time ? new Date(trade.entry_time) : null,
+    exit_time: trade.exit_time ? new Date(trade.exit_time) : null,
+  };
+
+  // Optimistically update frontend
+  setTrades((prev) => [...prev, tradeForDisplay]);
+
+  try {
+    const res = await fetch(`${apiUrl}/trades/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(tradeToSend),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text);
+    }
+
+    const data = await res.json();
+
+    // Convert returned UTC timestamps from backend to local Date
+    const dataForDisplay = {
+      ...data,
+      entry_time: data.entry_time ? new Date(data.entry_time) : null,
+      exit_time: data.exit_time ? new Date(data.exit_time) : null,
+    };
+
+    setTrades((prev) =>
+      prev.map((t) => (t === tradeForDisplay ? dataForDisplay : t))
+    );
+
+    showNotification({
+      title: "Trade saved",
+      message: `Trade logged successfully!`,
+      color: "green",
+    });
+
+  } catch (err: any) {
+    console.error("Failed to save trade:", err);
+    showNotification({
+      title: "Error saving trade",
+      message: err.message ?? "Unknown error",
+      color: "red",
+    });
+
+    // remove optimistic trade
+    setTrades((prev) => prev.filter((t) => t !== tradeForDisplay));
+  }
+};
+
 
   return (
     <MantineProvider>
@@ -50,7 +141,12 @@ export const Intraday: React.FC<{ apiUrl?: string }> = ({
         ) : noData ? (
           <Center style={{ flex: 1 }}><Text c="dimmed" size="lg">No data available for {tradingDate?.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</Text></Center>
         ) : (
-          <IntradayChart candles={candles} trades={trades} />
+          <IntradayChart
+            candles={candles}
+            trades={trades}
+            onTradeMarked={(trade) => saveTrade(trade)}
+            // onTradeMarked={(trade) => console.log("Trade marked from Intraday component:", trade)}
+          />
         )}
       </Card>
     </MantineProvider>
