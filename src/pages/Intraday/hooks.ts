@@ -59,8 +59,8 @@ export interface Trade {
   size: number;
   entry_price: number;
   exit_price?: number;
-  entry_time: string;
-  exit_time?: string;
+  entry_time: Date | string | null;
+  exit_time?: Date | string | null;
   notes?: string;
 }
 

@@ -46,6 +46,7 @@ function makeLineAndLabel(
 }
 
 export default function IntradayChart({ candles, trades = [], onTradeMarked }: Props) {
+  console.log("Rendering IntradayChart with candles:", trades);
   if (!candles.length) return null;
 
   const x0 = candles[0].timestamp_sgt;
@@ -229,6 +230,7 @@ export default function IntradayChart({ candles, trades = [], onTradeMarked }: P
       style={{ width: "100%", height: "100%" }}
       useResizeHandler
       config={{ responsive: true, displayModeBar: false }}
+      // @ts-ignore
       onClick={handleClick}
     />
     <Modal
@@ -251,10 +253,9 @@ export default function IntradayChart({ candles, trades = [], onTradeMarked }: P
             <NumberInput
               label="Size"
               value={size}
-              onChange={(val) => setSize(val ?? 0.01)}
+              onChange={(val) => setSize(typeof val === "number" ? val : Number(val) || 0.01)}
               min={0.01}
               step={0.01}
-              precision={2}
             />
             <Select
               label="Entry price"
