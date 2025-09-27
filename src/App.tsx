@@ -4,6 +4,7 @@ import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import TopMenu from "./components/layout/TopMenu";
 import Home from "./pages/Home/Home";
+import About from "./pages/About/About";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
 
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
           {/* <Route path="/intraday" element={<Intraday />} />
           <Route path="/backtest" element={<Backtest />} /> */}
           <Route path="*" element={<div>Page not found</div>} />

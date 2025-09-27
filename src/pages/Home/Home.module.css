@@ -5,5 +5,5 @@
 
 .tab:not([data-active]):hover {
   background-color: #e6f0ff; /* light blue background */
-  color: #1c7ed6;           /* darker blue text */
+  color: #3b82f6;           /* darker blue text */
 }
