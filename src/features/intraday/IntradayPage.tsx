@@ -111,6 +111,7 @@ export const IntradayPage: React.FC<{ apiUrl?: string }> = ({
   };
 
   return (
+    <MantineProvider>
       <Card shadow="sm" p="lg" radius="md" style={{ width: "100%", height: "80vh", minHeight: 600, display: "flex", flexDirection: "column" }}>
         {/* Filters */}
         <Group mb="md" gap="md" align="center">
@@ -146,5 +147,6 @@ export const IntradayPage: React.FC<{ apiUrl?: string }> = ({
           />
         )}
       </Card>
+    </MantineProvider>
   );
 };
