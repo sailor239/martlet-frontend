@@ -1,14 +1,14 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { MantineProvider } from "@mantine/core";
+// import { MantineProvider } from "@mantine/core";
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
-import TopMenu from "./components/layout/TopMenu";
-import Home from "./pages/Home/Home";
-import About from "./pages/About/About";
+import TopMenu from "../components/layout/TopMenu";
+import Home from "../pages/Home/Home";
+import About from "../pages/AboutPage";
 
 function App() {
   return (
-    <MantineProvider>
+    // <MantineProvider>
       <BrowserRouter>
         <TopMenu /> {/* Visible on all pages */}
 
@@ -20,7 +20,7 @@ function App() {
           <Route path="*" element={<div>Page not found</div>} />
         </Routes>
       </BrowserRouter>
-    </MantineProvider>
+    // </MantineProvider>
   );
 }
 

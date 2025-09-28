@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Button, Group, NumberInput, Select, TextInput } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
-import { useAddTrade } from "./hooks";
+import { useAddTrade } from "../hooks/useJournal";
 
 export const TradeForm: React.FC = () => {
   const [ticker, setTicker] = useState("xauusd");

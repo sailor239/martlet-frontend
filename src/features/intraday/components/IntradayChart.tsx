@@ -1,8 +1,8 @@
 import { Modal, Button, Group, NumberInput, Select, Text, Switch } from "@mantine/core";
 import { useState } from "react";
 import Plot from "react-plotly.js";
-import type { Candle } from "../../types/candle";
-import type { Trade } from "./hooks";
+import type { Candle } from "../../../types/candle";
+import type { Trade } from "../hooks/useIntraday";
 
 interface Props {
   candles: Candle[];

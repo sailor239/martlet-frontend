@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getTrades, postTrade } from "../../services/api";
+import { getTrades, postTrade } from "../../../services/api";
 
 export function useTrades() {
   return useQuery({

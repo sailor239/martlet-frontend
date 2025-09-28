@@ -1,11 +1,11 @@
 import Plot from "react-plotly.js";
-import type { BacktestResult } from "./hooks";
+import type { BacktestResult } from "../hooks/useBacktest";
 
 interface Props {
   results: BacktestResult[];
 }
 
-export default function BacktestChart({ results }: Props) {
+export function BacktestChart({ results }: Props) {
   if (!results.length) return <div>No backtest data</div>;
 
   return (
@@ -18,13 +18,13 @@ export default function BacktestChart({ results }: Props) {
           mode: "lines+markers",
           name: "Equity Curve",
         },
-        {
-          x: results.map(r => r.timestamp),
-          y: results.map(r => r.pnl),
-          type: "bar",
-          name: "PnL",
-          yaxis: "y2",
-        },
+        // {
+        //   x: results.map(r => r.timestamp),
+        //   y: results.map(r => r.pnl),
+        //   type: "bar",
+        //   name: "PnL",
+        //   yaxis: "y2",
+        // },
       ]}
       layout={{
         title: "Backtest Results",

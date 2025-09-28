@@ -1,0 +1,73 @@
+import { useState } from "react";
+import { Button, Card, Loader, Center, Group, Select, Text } from "@mantine/core";
+import { BacktestChart, useBacktestData } from "../backtest";
+import { notifications } from "@mantine/notifications";
+
+export const BacktestPage: React.FC<{ apiUrl?: string }> = ({
+  apiUrl = import.meta.env.VITE_API_URL,
+}) => {
+  const [ticker, setTicker] = useState("xauusd");
+  const [timeframe, setTimeframe] = useState("5min");
+  const [isRunning, setIsRunning] = useState(false);
+
+  const runBacktest = async () => {
+    setIsRunning(true);
+    try {
+      const res = await fetch(`${apiUrl}/backtest/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ticker, timeframe }),
+      });
+
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+
+      notifications.show({
+        title: "Backtest Complete",
+        message: "Backtest finished successfully",
+        color: "green",
+      });
+    } catch (err: any) {
+      console.error("Backtest error:", err);
+      notifications.show({
+        title: "Backtest Failed",
+        message: err.message ?? "Unknown error",
+        color: "red",
+      });
+    } finally {
+      setIsRunning(false);
+    }
+  };
+
+  const { data: results = [], isLoading, error, noData } = useBacktestData(
+    ticker,
+    timeframe,
+    apiUrl
+  );
+
+  return (
+    <Card shadow="sm" p="lg" radius="md" style={{ width: "100%", height: "80vh", minHeight: 600, display: "flex", flexDirection: "column" }}>
+      <Group mb="md" gap="md" align="center">
+        <Text size="sm" fw={500}>Ticker:</Text>
+        <Select value={ticker} onChange={(val) => val && setTicker(val)} data={[{ value: "xauusd", label: "XAUUSD" }]} w={120} />
+        <Text size="sm" fw={500}>Timeframe:</Text>
+        <Select value={timeframe} onChange={(val) => val && setTimeframe(val)} data={[{ value: "5min", label: "5 Minutes" }]} w={120} />
+        <Button onClick={runBacktest} disabled={isRunning}>
+          {isRunning ? <Loader size="xs" /> : "Run Backtest"}
+        </Button>
+      </Group>
+
+      {isLoading && (
+        <Center style={{ height: 200 }}>
+          <Loader />
+        </Center>
+      )}
+
+      {error && <Text c="red">{error.message}</Text>}
+      {noData && <Text>No backtest data for selected ticker/timeframe</Text>}
+
+      {!isLoading && !error && results.length > 0 && <BacktestChart results={results} />}
+    </Card>
+  );
+}

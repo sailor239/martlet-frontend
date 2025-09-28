@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { MantineProvider, Card, Text, Loader, Center, Group, Select } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
-import IntradayChart from "./IntradayChart";
-import { useIntradayData, useTrades } from "./hooks";
+import IntradayChart from "./components/IntradayChart";
+import { useIntradayData, useTrades } from "../intraday";
 import { showNotification } from '@mantine/notifications';
 
-export const Intraday: React.FC<{ apiUrl?: string }> = ({
+export const IntradayPage: React.FC<{ apiUrl?: string }> = ({
   apiUrl = import.meta.env.VITE_API_URL,
 }) => {
   const [ticker, setTicker] = useState("xauusd");
@@ -111,7 +111,6 @@ export const Intraday: React.FC<{ apiUrl?: string }> = ({
   };
 
   return (
-    <MantineProvider>
       <Card shadow="sm" p="lg" radius="md" style={{ width: "100%", height: "80vh", minHeight: 600, display: "flex", flexDirection: "column" }}>
         {/* Filters */}
         <Group mb="md" gap="md" align="center">
@@ -147,6 +146,5 @@ export const Intraday: React.FC<{ apiUrl?: string }> = ({
           />
         )}
       </Card>
-    </MantineProvider>
   );
 };

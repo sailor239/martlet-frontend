@@ -15,7 +15,7 @@ export const fetchBacktestData = async (
 ): Promise<BacktestResult[]> => {
   const body = { ticker, timeframe };
 
-  const res = await fetch(`${apiUrl}/backtest/`, {
+  const res = await fetch(`${apiUrl}/backtest/${ticker}/${timeframe}/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),

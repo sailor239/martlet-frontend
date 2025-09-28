@@ -1,4 +1,3 @@
-// src/components/trades/TradeList.tsx
 import React from "react";
 import { Card, Text, Group, Button } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";

@@ -1,11 +1,8 @@
-// src/pages/JournalPage.tsx
 import React from "react";
 import { Container, Grid, Title, Card, Loader, Text, Center } from "@mantine/core";
-import { TradeForm } from "./TradeForm";
-import { TradeList } from "./TradeList";
-import { useTrades } from "./hooks";
+import { TradeForm, TradeList, useTrades } from "../journal";
 
-export const Journal: React.FC = () => {
+export const JournalPage: React.FC = () => {
   const { data: trades, isLoading, error } = useTrades();
 
   return (
