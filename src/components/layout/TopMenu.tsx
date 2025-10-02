@@ -32,6 +32,10 @@ export default function TopMenu() {
       label: "About",
       path: "/about",
     },
+    {
+      label: "Roadmap",
+      path: "/roadmap",
+    },
   ];
 
   return (
