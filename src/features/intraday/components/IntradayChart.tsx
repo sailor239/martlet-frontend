@@ -1,8 +1,9 @@
 import { Modal, Button, Group, NumberInput, Select, Text, Switch } from "@mantine/core";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Plot from "react-plotly.js";
 import type { Candle } from "../../../types/candle";
 import type { Trade } from "../hooks/useIntraday";
+import CandleCountdown from "./CandleCountdown";
 
 interface Props {
   candles: Candle[];
@@ -51,6 +52,28 @@ export default function IntradayChart({ candles, trades = [], onTradeMarked }: P
 
   const x0 = candles[0].timestamp_sgt;
   const x1 = candles[candles.length - 1].timestamp_sgt;
+
+  const [countdownStr, setCountdownStr] = useState("00:00");
+
+  useEffect(() => {
+    if (!candles.length) return;
+
+    const timeframeSeconds = 5 * 60; // 5 minutes
+    const interval = setInterval(() => {
+      const now = new Date();
+      const lastCandleTime = new Date(candles[candles.length - 1].timestamp_sgt);
+      const elapsed = Math.floor((now.getTime() - lastCandleTime.getTime()) / 1000);
+      const remaining = timeframeSeconds - (elapsed % timeframeSeconds);
+
+      const minutes = Math.floor(remaining / 60);
+      const seconds = remaining % 60;
+      setCountdownStr(
+        `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+      );
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [candles]);
 
   const [markMode, setMarkMode] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -129,11 +152,12 @@ export default function IntradayChart({ candles, trades = [], onTradeMarked }: P
         thumb: { cursor: "pointer" }, // the knob
       }}
     />
-    <Text size="sm" fw={500} style={{ cursor: "default", userSelect: "none" }}>
-      Mark Trades
-    </Text>
+      <Text size="sm" fw={500} style={{ cursor: "default", userSelect: "none" }}>
+        Mark Trades
+      </Text>
     </Group>
     <Plot
+      key={candles[candles.length - 1].timestamp_sgt}
       data={[
         {
           x: candles.map((c) => c.timestamp_sgt),
@@ -225,6 +249,31 @@ export default function IntradayChart({ candles, trades = [], onTradeMarked }: P
         annotations: [
           makeLineAndLabel(candles[0]?.prev_day_high ?? 0, "green", "Prev Day High", x0, x1).annotation,
           makeLineAndLabel(candles[0]?.prev_day_low ?? 0, "red", "Prev Day Low", x0, x1).annotation,
+          {
+            x: candles[candles.length - 1].timestamp_sgt, // last candle
+            y: candles[candles.length - 1].high,         // slightly above the candle
+            xref: 'x',
+            yref: 'y',
+            text: `${countdownStr}`,
+            showarrow: true,
+            arrowhead: 1,
+            arrowcolor: "rgba(30, 144, 255, 0.85)",
+            ax: 64,
+            ay: 0,
+            font: {
+              family: "Arial, sans-serif",
+              size: 14,
+              color: "#ffffff",
+              weight: "bold",
+            },
+            align: "center",
+            bgcolor: "rgba(30, 144, 255, 0.85)", // DodgerBlue semi-transparent
+            bordercolor: "rgba(0,0,0,0.2)",
+            borderwidth: 1,
+            borderpad: 6,
+            borderradius: 6,
+            opacity: 0.9,
+          }
         ],
       }}
       style={{ width: "100%", height: "100%" }}

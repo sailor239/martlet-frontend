@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { MantineProvider, Card, Text, Loader, Center, Group, Select } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import IntradayChart from "./components/IntradayChart";
+import TimezoneClock from "../../components/ui/TimezoneClock";
 import { useIntradayData, useTrades } from "../intraday";
 import { showNotification } from '@mantine/notifications';
 
@@ -12,7 +13,7 @@ export const IntradayPage: React.FC<{ apiUrl?: string }> = ({
   const [timeframe, setTimeframe] = useState("5min");
   const [tradingDate, setTradingDate] = useState<Date | null>(new Date());
 
-  const { data: candles = [], isLoading, error, noData } = useIntradayData(
+  const { data: candles = [], isLoading, error, noData, refetch } = useIntradayData(
     ticker,
     timeframe,
     tradingDate,
@@ -45,6 +46,31 @@ export const IntradayPage: React.FC<{ apiUrl?: string }> = ({
       return prev; // no update
     });
   }, [backendTrades]);
+
+  useEffect(() => {
+    if (!candles.length) return;
+
+    const timeframeSeconds = 5 * 60; // 5 minutes in seconds
+    let lastTimestamp = candles[candles.length - 1].timestamp_sgt;
+
+    const interval = setInterval(async () => {
+      const now = new Date();
+      const lastCandleTime = new Date(lastTimestamp);
+      const elapsed = Math.floor((now.getTime() - lastCandleTime.getTime()) / 1000);
+      const remaining = timeframeSeconds - (elapsed % timeframeSeconds);
+
+      // Wait until after candle closes
+      if (remaining <= 0) {
+        const newCandles = await refetch();
+        const newestTimestamp = newCandles.data?.[newCandles.data.length - 1]?.timestamp_sgt;
+        if (newestTimestamp && newestTimestamp !== lastTimestamp) {
+          lastTimestamp = newestTimestamp;
+        }
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [candles, refetch]);
 
   // 1️⃣ Backend save function
   const saveTrade = async (trade: any) => {
@@ -128,9 +154,19 @@ export const IntradayPage: React.FC<{ apiUrl?: string }> = ({
           </Group>
         </Group>
 
-        <Text size="xl" fw={500} mb="md">
-          {tradingDate ? tradingDate.toLocaleDateString("en-GB", { weekday: "short", day: "2-digit", month: "short", year: "numeric" }) : ""}
-        </Text>
+        <Group justify="space-between" align="center" mb="md">
+          <Text size="xl" fw={500}>
+            {tradingDate
+              ? tradingDate.toLocaleDateString("en-GB", {
+                  weekday: "short",
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })
+              : ""}
+          </Text>
+          <TimezoneClock />
+        </Group>
 
         {/* Chart / messages */}
         {isLoading ? (
