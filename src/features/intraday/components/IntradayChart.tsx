@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import Plot from "react-plotly.js";
 import type { Candle } from "../../../types/candle";
 import type { Trade } from "../hooks/useIntraday";
-import CandleCountdown from "./CandleCountdown";
 
 interface Props {
   candles: Candle[];
