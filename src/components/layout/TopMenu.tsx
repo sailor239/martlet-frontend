@@ -41,6 +41,7 @@ export default function TopMenu() {
   return (
     <Paper
       shadow="xs"
+      radius={0}
       style={{
         background: "#1e293b",
         color: "#fff",

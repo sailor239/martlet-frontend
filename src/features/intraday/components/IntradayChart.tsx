@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Plot from "react-plotly.js";
 import type { Candle } from "../../../types/candle";
 import type { Trade } from "../hooks/useIntraday";
+import CandleCountdown from "./CandleCountdown";
 
 interface Props {
   candles: Candle[];
@@ -54,25 +55,25 @@ export default function IntradayChart({ candles, trades = [], onTradeMarked }: P
 
   const [countdownStr, setCountdownStr] = useState("00:00");
 
-  useEffect(() => {
-    if (!candles.length) return;
+  // useEffect(() => {
+  //   if (!candles.length) return;
 
-    const timeframeSeconds = 5 * 60; // 5 minutes
-    const interval = setInterval(() => {
-      const now = new Date();
-      const lastCandleTime = new Date(candles[candles.length - 1].timestamp_sgt);
-      const elapsed = Math.floor((now.getTime() - lastCandleTime.getTime()) / 1000);
-      const remaining = timeframeSeconds - (elapsed % timeframeSeconds);
+  //   const timeframeSeconds = 5 * 60; // 5 minutes
+  //   const interval = setInterval(() => {
+  //     const now = new Date();
+  //     const lastCandleTime = new Date(candles[candles.length - 1].timestamp_sgt);
+  //     const elapsed = Math.floor((now.getTime() - lastCandleTime.getTime()) / 1000);
+  //     const remaining = timeframeSeconds - (elapsed % timeframeSeconds);
 
-      const minutes = Math.floor(remaining / 60);
-      const seconds = remaining % 60;
-      setCountdownStr(
-        `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
-      );
-    }, 1000);
+  //     const minutes = Math.floor(remaining / 60);
+  //     const seconds = remaining % 60;
+  //     setCountdownStr(
+  //       `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+  //     );
+  //   }, 1000);
 
-    return () => clearInterval(interval);
-  }, [candles]);
+  //   return () => clearInterval(interval);
+  // }, [candles]);
 
   const [markMode, setMarkMode] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -154,6 +155,13 @@ export default function IntradayChart({ candles, trades = [], onTradeMarked }: P
       <Text size="sm" fw={500} style={{ cursor: "default", userSelect: "none" }}>
         Mark Trades
       </Text>
+      {/* Countdown for the next candle */}
+      {candles.length > 0 && (
+        <CandleCountdown
+          timeframe={5 * 60} // 5 min candles → seconds
+          lastCandleTime={new Date(candles[candles.length - 1].timestamp_sgt)}
+        />
+      )}
     </Group>
     <Plot
       key={candles[candles.length - 1].timestamp_sgt}
@@ -257,11 +265,11 @@ export default function IntradayChart({ candles, trades = [], onTradeMarked }: P
             showarrow: true,
             arrowhead: 1,
             arrowcolor: "rgba(30, 144, 255, 0.85)",
-            ax: 64,
+            ax: 50,
             ay: 0,
             font: {
               family: "Arial, sans-serif",
-              size: 14,
+              size: 12,
               color: "#ffffff",
               weight: "bold",
             },

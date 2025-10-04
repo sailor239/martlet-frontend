@@ -1,16 +1,14 @@
-import { Container, Text, Paper } from "@mantine/core";
+import { Card, Text } from "@mantine/core";
 
 export default function About() {
   return (
-    <Container style={{ padding: 40, maxWidth: 800 }}>
-      <Paper shadow="xs" style={{ backgroundColor: "#f8fafc" }}>
-        <Text size="xl" fw={700} c="#1e293b">
-          About Martlet
-        </Text>
-        <Text mt="md" c="#475569">
-          Work in progress...
-        </Text>
-      </Paper>
-    </Container>
+    <Card shadow="sm" p="lg" radius="md" style={{ width: "100%", height: "80vh", minHeight: 600, display: "flex", flexDirection: "column" }}> 
+      <Text size="xl" fw={700} c="#1e293b">
+        About Martlet
+      </Text>
+      <Text mt="md" c="#475569">
+        Work in progress...
+      </Text>
+    </Card>
   );
 }
