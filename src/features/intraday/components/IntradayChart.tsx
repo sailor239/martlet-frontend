@@ -1,6 +1,5 @@
 import { Modal, Button, Group, NumberInput, Select, Text, Switch } from "@mantine/core";
 import { useState } from "react";
-// import { useEffect } from "react";
 import Plot from "react-plotly.js";
 import type { Candle } from "../../../types/candle";
 import type { Trade } from "../hooks/useIntraday";
@@ -53,28 +52,6 @@ export default function IntradayChart({ candles, trades = [], onTradeMarked }: P
 
   const x0 = candles[0].timestamp_sgt;
   const x1 = candles[candles.length - 1].timestamp_sgt;
-
-  // const [countdownStr, setCountdownStr] = useState("00:00");
-
-  // useEffect(() => {
-  //   if (!candles.length) return;
-
-  //   const timeframeSeconds = 5 * 60; // 5 minutes
-  //   const interval = setInterval(() => {
-  //     const now = new Date();
-  //     const lastCandleTime = new Date(candles[candles.length - 1].timestamp_sgt);
-  //     const elapsed = Math.floor((now.getTime() - lastCandleTime.getTime()) / 1000);
-  //     const remaining = timeframeSeconds - (elapsed % timeframeSeconds);
-
-  //     const minutes = Math.floor(remaining / 60);
-  //     const seconds = remaining % 60;
-  //     setCountdownStr(
-  //       `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
-  //     );
-  //   }, 1000);
-
-  //   return () => clearInterval(interval);
-  // }, [candles]);
 
   const [markMode, setMarkMode] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -138,159 +115,154 @@ export default function IntradayChart({ candles, trades = [], onTradeMarked }: P
 
     setModalOpen(false);
   };
-
-
+  
   return (
     <>
-    <Group gap="xs" align="center">
-      <Switch
-      checked={markMode}
-      onChange={(e) => setMarkMode(e.currentTarget.checked)}
-      label={null} // remove built-in label
-      styles={{
-        input: { cursor: "pointer" }, // the hidden checkbox
-        track: { cursor: "pointer" }, // the switch track
-        thumb: { cursor: "pointer" }, // the knob
-      }}
-    />
-      <Text size="sm" fw={500} style={{ cursor: "default", userSelect: "none" }}>
-        Mark Trades
-      </Text>
-      {/* Countdown for the next candle */}
-      {candles.length > 0 && (
-        <CandleCountdown
-          timeframe={5 * 60} // 5 min candles → seconds
-          lastCandleTime={new Date(candles[candles.length - 1].timestamp_sgt)}
+      <Group gap="xs" align="center">
+        <Switch
+          checked={markMode}
+          onChange={(e) => setMarkMode(e.currentTarget.checked)}
+          label={null} // remove built-in label
+          styles={{
+            input: { cursor: "pointer" }, // the hidden checkbox
+            track: { cursor: "pointer" }, // the switch track
+            thumb: { cursor: "pointer" }, // the knob
+          }}
         />
-      )}
-    </Group>
-    <Plot
-      key={candles[candles.length - 1].timestamp_sgt}
-      data={[
-        {
-          x: candles.map((c) => c.timestamp_sgt),
-          open: candles.map((c) => c.open),
-          high: candles.map((c) => c.high),
-          low: candles.map((c) => c.low),
-          close: candles.map((c) => c.close),
-          type: "candlestick",
-          name: "Price",
-          increasing: { line: { color: "green", width: 1.5 }, fillcolor: "white" },
-          decreasing: { line: { color: "red", width: 1.5 }, fillcolor: "red" },
-        },
-        {
-          x: candles.filter((c) => c.ema20 != null).map((c) => c.timestamp_sgt),
-          y: candles.filter((c) => c.ema20 != null).map((c) => c.ema20!),
-          type: "scatter",
-          mode: "lines",
-          line: { color: "purple", width: 1.5 },
-          name: "EMA20",
-          hoverinfo: "y+name",
-        },
-        // Entry markers
-        {
-          x: trades.map((t) => t.entry_time),
-          y: trades.map((t) => t.entry_price),
-          text: trades.map((t) => `${t.direction.toUpperCase()} x ${t.size}`),
-          mode: "markers+text",
-          textposition: "top center",
-          name: "Entries",
-          marker: {
-            symbol: trades.map((t) =>
-              t.direction === "long" ? "triangle-up" : "triangle-down"
-            ),
-            size: 14,
-            color: trades.map((t) =>
-              t.direction === "long" ? "green" : "red"
-            ),
-          },
-        },
-        // Exit markers
-        {
-          x: trades.filter((t) => t.exit_time).map((t) => t.exit_time!),
-          y: trades.filter((t) => t.exit_price).map((t) => t.exit_price!),
-          text: trades.filter((t) => t.exit_time).map(() => "Exit"),
-          mode: "markers+text",
-          textposition: "bottom center",
-          name: "Exits",
-          marker: {
-            symbol: "circle",
-            size: 12,
-            color: trades.map((t) => {
-              if (!t.exit_price) return "gray"; // still open
-              const profit = t.direction === "long"
-                ? t.exit_price > t.entry_price
-                : t.exit_price < t.entry_price;
-              return profit ? "green" : "red";
-            })
-          },
-        },
-      ]}
-      layout={{
-        autosize: true,
-        margin: { l: 160, r: 10, t: 40, b: 40 },
-        legend: {
-          orientation: "h", // horizontal layout
-          yanchor: "top",
-          y: -0.2, // push below chart
-          xanchor: "center",
-          x: 0.5,
-        },
-        xaxis: { rangeslider: { visible: false }, type: "date" },
-        yaxis: { autorange: true },
-        shapes: [
-          makeLineAndLabel(candles[0]?.prev_day_high ?? 0, "green", "Prev Day High", x0, x1).shape,
-          makeLineAndLabel(candles[0]?.prev_day_low ?? 0, "red", "Prev Day Low", x0, x1).shape,
+        <Text size="sm" fw={500} style={{ cursor: "default", userSelect: "none" }}>
+          Mark Trades
+        </Text>
+        {/* Countdown for the next candle */}
+        {candles.length > 0 && (
+          <CandleCountdown
+            timeframe={5 * 60} // 5 min candles → seconds
+            lastCandleTime={new Date(candles[candles.length - 1].timestamp_sgt)}
+          />
+        )}
+      </Group>
+      <Plot
+        key={candles[candles.length - 1].timestamp_sgt}
+        data={[
           {
-            type: "rect",
-            xref: "x",
-            yref: "y",
-            x0,
-            x1,
-            y0: candles[0]?.prev_day_low ?? 0,
-            y1: candles[0]?.prev_day_high ?? 0,
-            fillcolor: "rgba(173,216,230,0.2)",
-            line: { width: 0 },
-            layer: "below",
+            x: candles.map((c) => c.timestamp_sgt),
+            open: candles.map((c) => c.open),
+            high: candles.map((c) => c.high),
+            low: candles.map((c) => c.low),
+            close: candles.map((c) => c.close),
+            type: "candlestick",
+            name: "Price",
+            increasing: { line: { color: "green", width: 1.5 }, fillcolor: "white" },
+            decreasing: { line: { color: "red", width: 1.5 }, fillcolor: "red" },
           },
-        ],
-        annotations: [
-          makeLineAndLabel(candles[0]?.prev_day_high ?? 0, "green", "Prev Day High", x0, x1).annotation,
-          makeLineAndLabel(candles[0]?.prev_day_low ?? 0, "red", "Prev Day Low", x0, x1).annotation,
-          // {
-          //   x: candles[candles.length - 1].timestamp_sgt, // last candle
-          //   y: candles[candles.length - 1].high,         // slightly above the candle
-          //   xref: 'x',
-          //   yref: 'y',
-          //   text: `${countdownStr}`,
-          //   showarrow: true,
-          //   arrowhead: 1,
-          //   arrowcolor: "rgba(30, 144, 255, 0.85)",
-          //   ax: 50,
-          //   ay: 0,
-          //   font: {
-          //     family: "Arial, sans-serif",
-          //     size: 12,
-          //     color: "#ffffff",
-          //     weight: "bold",
-          //   },
-          //   align: "center",
-          //   bgcolor: "rgba(30, 144, 255, 0.85)", // DodgerBlue semi-transparent
-          //   bordercolor: "rgba(0,0,0,0.2)",
-          //   borderwidth: 1,
-          //   borderpad: 6,
-          //   borderradius: 6,
-          //   opacity: 0.9,
-          // }
-        ],
-      }}
-      style={{ width: "100%", height: "100%" }}
-      useResizeHandler
-      config={{ responsive: true, displayModeBar: false }}
-      // @ts-ignore
-      onClick={handleClick}
-    />
-    <Modal
+          {
+            x: candles.filter((c) => c.ema20 != null).map((c) => c.timestamp_sgt),
+            y: candles.filter((c) => c.ema20 != null).map((c) => c.ema20!),
+            type: "scatter",
+            mode: "lines",
+            line: { color: "purple", width: 1.5 },
+            name: "EMA20",
+            hoverinfo: "y+name",
+            hoveron: "points",        // only trigger hover when cursor is very close to points
+            hoverdistance: 0.001,         // smaller = less sensitive
+          },
+          // Entry markers
+          {
+            x: trades.map((t) => t.entry_time),
+            y: trades.map((t) => t.entry_price),
+            text: trades.map((t) => `${t.direction.toUpperCase()} x ${t.size}`),
+            mode: "markers+text",
+            textposition: "top center",
+            name: "Entries",
+            marker: {
+              symbol: trades.map((t) =>
+                t.direction === "long" ? "triangle-up" : "triangle-down"
+              ),
+              size: 14,
+              color: trades.map((t) =>
+                t.direction === "long" ? "green" : "red"
+              ),
+            },
+          },
+          // Exit markers
+          {
+            x: trades.filter((t) => t.exit_time).map((t) => t.exit_time!),
+            y: trades.filter((t) => t.exit_price).map((t) => t.exit_price!),
+            text: trades.filter((t) => t.exit_time).map(() => "Exit"),
+            mode: "markers+text",
+            textposition: "bottom center",
+            name: "Exits",
+            marker: {
+              symbol: "circle",
+              size: 12,
+              color: trades.map((t) => {
+                if (!t.exit_price) return "gray"; // still open
+                const profit = t.direction === "long"
+                  ? t.exit_price > t.entry_price
+                  : t.exit_price < t.entry_price;
+                return profit ? "green" : "red";
+              })
+            },
+          },
+        ]}
+        layout={{
+          autosize: true,
+          margin: { l: 160, r: 10, t: 40, b: 40 },
+          legend: {
+            orientation: "h", // horizontal layout
+            yanchor: "top",
+            y: -0.2, // push below chart
+            xanchor: "center",
+            x: 0.5,
+          },
+          xaxis: {
+            type: "date",
+            rangeslider: { visible: false },
+            showspikes: true,        // enable vertical spike
+            spikemode: "across",     // make it extend across plot
+            spikesnap: "cursor",
+            spikedash: "dot",
+            spikethickness: 1,
+            spikecolor: "gray",
+          },
+          yaxis: {
+            autorange: true,
+            showspikes: true,        // enable horizontal spike
+            spikemode: "across",
+            spikesnap: "cursor",
+            spikedash: "dot",
+            spikethickness: 1,
+            spikecolor: "gray",
+          },
+          hovermode: "closest",       // show hover info at closest point
+          shapes: [
+            makeLineAndLabel(candles[0]?.prev_day_high ?? 0, "green", "Prev Day High", x0, x1).shape,
+            makeLineAndLabel(candles[0]?.prev_day_low ?? 0, "red", "Prev Day Low", x0, x1).shape,
+            {
+              type: "rect",
+              xref: "x",
+              yref: "y",
+              x0,
+              x1,
+              y0: candles[0]?.prev_day_low ?? 0,
+              y1: candles[0]?.prev_day_high ?? 0,
+              fillcolor: "rgba(173,216,230,0.2)",
+              line: { width: 0 },
+              layer: "below",
+            },
+          ],
+          annotations: [
+            makeLineAndLabel(candles[0]?.prev_day_high ?? 0, "green", "Prev Day High", x0, x1).annotation,
+            makeLineAndLabel(candles[0]?.prev_day_low ?? 0, "red", "Prev Day Low", x0, x1).annotation,
+          ],
+        }}
+        style={{ width: "100%", height: "100%" }}
+        useResizeHandler
+        config={{ responsive: true, displayModeBar: false }}
+        // @ts-ignore
+        onClick={handleClick}
+      />
+
+      <Modal
         opened={modalOpen}
         onClose={() => setModalOpen(false)}
         title={activeEntry ? "Mark Exit" : "Mark Entry"}
@@ -370,6 +342,6 @@ export default function IntradayChart({ candles, trades = [], onTradeMarked }: P
           </Button>
         </Group>
       </Modal>
-      </>
+    </>
   );
 }
