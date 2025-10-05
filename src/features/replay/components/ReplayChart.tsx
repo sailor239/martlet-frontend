@@ -1,5 +1,5 @@
 import { Modal, Button, Group, NumberInput, Select, Text, Switch } from "@mantine/core";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Plot from "react-plotly.js";
 import type { Candle } from "../../../types/candle";
 import type { Trade } from "../hooks/useIntraday";
@@ -10,46 +10,8 @@ interface Props {
   onTradeMarked?: (trade: Trade) => void;
 }
 
-function makeLineAndLabel(
-  y: number,
-  color: string,
-  label: string,
-  x0: string,
-  x1: string
-) {
-  return {
-    shape: {
-      type: "line",
-      xref: "x",
-      yref: "y",
-      x0,
-      x1,
-      y0: y,
-      y1: y,
-      line: { color, width: 1.5, dash: "dashdot" },
-    },
-    annotation: {
-      x: -0.05,
-      xref: "paper",
-      y,
-      yref: "y",
-      text: `${label}<br>${Number(y).toFixed(2)}`,
-      showarrow: false,
-      font: { color, size: 12 },
-      xanchor: "right",
-      yanchor: "middle",
-      bgcolor: "rgba(0,0,0,0)",
-      bordercolor: color,
-      borderwidth: 1,
-    },
-  };
-}
-
 export default function ReplayChart({ candles, trades = [], onTradeMarked }: Props) {
   if (!candles.length) return null;
-
-  const x0 = candles[0].timestamp_sgt;
-  const x1 = candles[candles.length - 1].timestamp_sgt;
 
   const [markMode, setMarkMode] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
