@@ -1,5 +1,6 @@
 import { Modal, Button, Group, NumberInput, Select, Text, Switch } from "@mantine/core";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+// import { useEffect } from "react";
 import Plot from "react-plotly.js";
 import type { Candle } from "../../../types/candle";
 import type { Trade } from "../hooks/useIntraday";
@@ -53,7 +54,7 @@ export default function IntradayChart({ candles, trades = [], onTradeMarked }: P
   const x0 = candles[0].timestamp_sgt;
   const x1 = candles[candles.length - 1].timestamp_sgt;
 
-  const [countdownStr, setCountdownStr] = useState("00:00");
+  // const [countdownStr, setCountdownStr] = useState("00:00");
 
   // useEffect(() => {
   //   if (!candles.length) return;
@@ -256,31 +257,31 @@ export default function IntradayChart({ candles, trades = [], onTradeMarked }: P
         annotations: [
           makeLineAndLabel(candles[0]?.prev_day_high ?? 0, "green", "Prev Day High", x0, x1).annotation,
           makeLineAndLabel(candles[0]?.prev_day_low ?? 0, "red", "Prev Day Low", x0, x1).annotation,
-          {
-            x: candles[candles.length - 1].timestamp_sgt, // last candle
-            y: candles[candles.length - 1].high,         // slightly above the candle
-            xref: 'x',
-            yref: 'y',
-            text: `${countdownStr}`,
-            showarrow: true,
-            arrowhead: 1,
-            arrowcolor: "rgba(30, 144, 255, 0.85)",
-            ax: 50,
-            ay: 0,
-            font: {
-              family: "Arial, sans-serif",
-              size: 12,
-              color: "#ffffff",
-              weight: "bold",
-            },
-            align: "center",
-            bgcolor: "rgba(30, 144, 255, 0.85)", // DodgerBlue semi-transparent
-            bordercolor: "rgba(0,0,0,0.2)",
-            borderwidth: 1,
-            borderpad: 6,
-            borderradius: 6,
-            opacity: 0.9,
-          }
+          // {
+          //   x: candles[candles.length - 1].timestamp_sgt, // last candle
+          //   y: candles[candles.length - 1].high,         // slightly above the candle
+          //   xref: 'x',
+          //   yref: 'y',
+          //   text: `${countdownStr}`,
+          //   showarrow: true,
+          //   arrowhead: 1,
+          //   arrowcolor: "rgba(30, 144, 255, 0.85)",
+          //   ax: 50,
+          //   ay: 0,
+          //   font: {
+          //     family: "Arial, sans-serif",
+          //     size: 12,
+          //     color: "#ffffff",
+          //     weight: "bold",
+          //   },
+          //   align: "center",
+          //   bgcolor: "rgba(30, 144, 255, 0.85)", // DodgerBlue semi-transparent
+          //   bordercolor: "rgba(0,0,0,0.2)",
+          //   borderwidth: 1,
+          //   borderpad: 6,
+          //   borderradius: 6,
+          //   opacity: 0.9,
+          // }
         ],
       }}
       style={{ width: "100%", height: "100%" }}

@@ -3,6 +3,7 @@ import { Card, Text, Center, NavLink, Flex } from "@mantine/core";
 import IntradayPage from "../IntradayPage";
 import BacktestPage from "../BacktestPage";
 import JournalPage from "../JournalPage";
+import ReplayPage from "../ReplayPage";
 
 export default function Home() {
   const [activePage, setActivePage] = useState<string | null>(null);
@@ -33,6 +34,11 @@ export default function Home() {
           active={activePage === "journal"}
           onClick={() => setActivePage("journal")}
         />
+        <NavLink
+          label="Replay"
+          active={activePage === "replay"}
+          onClick={() => setActivePage("replay")}
+        />
       </div>
 
       {/* Main content */}
@@ -58,6 +64,7 @@ export default function Home() {
         {activePage === "intraday" && <IntradayPage />}
         {activePage === "backtest" && <BacktestPage />}
         {activePage === "journal" && <JournalPage />}
+        {activePage === "replay" && <ReplayPage />}
       </div>
     </Flex>
   );
