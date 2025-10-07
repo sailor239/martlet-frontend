@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { MantineProvider, Button, Card, Text, Loader, Center, Group, Select } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import ReplayChart from "./components/ReplayChart";
@@ -149,6 +149,56 @@ export const ReplayPage: React.FC<{ apiUrl?: string }> = ({
     }
   };
 
+  // ✅ Cumulative P/L calculation based on visible candles
+  // ✅ Realized cumulative P/L — correctly constant after exits
+  const cumulativePL = useMemo(() => {
+    if (!visibleCandles.length) return [];
+
+    // const lastVisibleTime = new Date(
+    //   visibleCandles[visibleCandles.length - 1].timestamp_sgt
+    // ).getTime();
+
+    // Sort trades by exit time
+    const exitedTrades = trades
+      .filter(t => t.exit_time && t.exit_price != null)
+      .sort(
+        (a, b) =>
+          new Date(a.exit_time!).getTime() - new Date(b.exit_time!).getTime()
+      );
+
+    let cumulative = 0;
+    const plPoints: number[] = [];
+    let countedTrades = new Set<number>();
+
+    for (const candle of visibleCandles) {
+      const candleTime = new Date(candle.timestamp_sgt).getTime();
+
+      // Add P/L for trades that just exited at or before this candle
+      for (const t of exitedTrades) {
+        const exitTime = new Date(t.exit_time!).getTime();
+        if (exitTime <= candleTime && !countedTrades.has(t.id)) {
+          const tradePL =
+            t.direction === "long"
+              ? (t.exit_price! - t.entry_price) * t.size
+              : (t.entry_price - t.exit_price!) * t.size;
+
+          cumulative += tradePL;
+          countedTrades.add(t.id);
+        }
+      }
+
+      plPoints.push(cumulative);
+    }
+
+    // Ensure first point is 0
+    if (plPoints.length > 0) {
+      plPoints[0] = 0;
+    }
+
+    return plPoints;
+  }, [trades, visibleCandles]);
+
+
   return (
     <MantineProvider>
       <Card shadow="sm" p="lg" radius="md" style={{ width: "100%", height: "80vh", minHeight: 600, display: "flex", flexDirection: "column" }}>
@@ -224,6 +274,7 @@ export const ReplayPage: React.FC<{ apiUrl?: string }> = ({
           <ReplayChart
             candles={visibleCandles} // ✅ use visible candles only
             trades={trades}
+            cumulativePL={cumulativePL} // ✅ pass cumulative P/L
             onTradeMarked={(trade) => saveTrade(trade)}
           />
         )}

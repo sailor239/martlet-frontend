@@ -7,13 +7,14 @@ import type { Trade } from "../hooks/useIntraday";
 interface Props {
   candles: Candle[];
   trades?: Trade[];
+  cumulativePL?: number[];
   onTradeMarked?: (trade: Trade) => void;
 }
 
-export default function ReplayChart({ candles, trades = [], onTradeMarked }: Props) {
+export default function ReplayChart({ candles, trades = [], cumulativePL = [], onTradeMarked }: Props) {
   if (!candles.length) return null;
-
-  const [markMode, setMarkMode] = useState(false);
+  
+  const [markMode, setMarkMode] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPoint, setSelectedPoint] = useState<any>(null);
 
@@ -98,7 +99,6 @@ export default function ReplayChart({ candles, trades = [], onTradeMarked }: Pro
         : undefined;
   }
 
-
   return (
     <>
       <Group gap="xs" align="center">
@@ -120,6 +120,7 @@ export default function ReplayChart({ candles, trades = [], onTradeMarked }: Pro
       <Plot
         key={candles[candles.length - 1].timestamp_sgt}
         data={[
+          // Candlestick
           {
             x: candles.map((c) => c.timestamp_sgt),
             open: candles.map((c) => c.open),
@@ -130,7 +131,10 @@ export default function ReplayChart({ candles, trades = [], onTradeMarked }: Pro
             name: "Price",
             increasing: { line: { color: "green", width: 1.5 }, fillcolor: "white" },
             decreasing: { line: { color: "red", width: 1.5 }, fillcolor: "red" },
+            xaxis: "x",
+            yaxis: "y",
           },
+          // EMA20
           {
             x: candles.filter((c) => c.ema20 != null).map((c) => c.timestamp_sgt),
             y: candles.filter((c) => c.ema20 != null).map((c) => c.ema20!),
@@ -178,10 +182,24 @@ export default function ReplayChart({ candles, trades = [], onTradeMarked }: Pro
               })
             },
           },
+          // Cumulative P/L
+          {
+            x: candles.map(c => c.timestamp_sgt), // same as candlesticks
+            y: cumulativePL,
+            type: "scatter",
+            mode: "lines+markers",
+            line: { color: "orange", width: 2 },
+            name: "Cumulative P/L",
+            yaxis: "y2",
+          }
         ]}
         layout={{
           autosize: true,
           margin: { l: 160, r: 10, t: 40, b: 40 },
+          grid: { rows: 2, columns: 1, roworder: "top to bottom" },
+          xaxis: { rangeslider: { visible: false }, type: "date" },
+          yaxis: { title: "Price" },
+          yaxis2: { title: "Cumulative P/L" },
           legend: {
             orientation: "h", // horizontal layout
             yanchor: "top",
@@ -189,8 +207,7 @@ export default function ReplayChart({ candles, trades = [], onTradeMarked }: Pro
             xanchor: "center",
             x: 0.5,
           },
-          xaxis: { rangeslider: { visible: false }, type: "date", range: xRange, },
-          yaxis: { autorange: true },
+          hovermode: "x unified",
         }}
         style={{ width: "100%", height: "100%" }}
         useResizeHandler

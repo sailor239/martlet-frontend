@@ -10,6 +10,7 @@ interface RoadmapItem {
 const roadmapData: RoadmapItem[] = [
   { title: "Allow user to mark trades directly on the intraday chart", status: "completed" },
   { title: "Show a live countdown to candle close on the intraday chart", status: "completed" },
+  { title: "Allow user to replay the daily candles for manual backtesting", status: "in-progress" },
   { title: "Show the status of market: open or closed", status: "planned" },
 ];
 
