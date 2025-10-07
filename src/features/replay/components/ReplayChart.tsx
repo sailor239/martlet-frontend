@@ -77,28 +77,6 @@ export default function ReplayChart({ candles, trades = [], cumulativePL = [], o
     setModalOpen(false);
   };
 
-  // Limit maximum visible width when few bars
-  const MAX_VISIBLE_BARS = 20;
-  const candleCount = candles.length;
-
-  if (candleCount > 0) {
-    const firstTimestamp = new Date(candles[0].timestamp_sgt).getTime();
-    const lastTimestamp = new Date(candles[candleCount - 1].timestamp_sgt).getTime();
-
-    const visibleBars = Math.min(MAX_VISIBLE_BARS, candleCount);
-    const span = (lastTimestamp - firstTimestamp) / visibleBars; // average bar spacing
-
-    // Add a bit of extra space to the left and right
-    const padding = span * 1; // 1 bar worth of padding
-    var xRange =
-      candleCount < MAX_VISIBLE_BARS
-        ? [
-            new Date(firstTimestamp - padding),
-            new Date(firstTimestamp + span * MAX_VISIBLE_BARS + padding),
-          ]
-        : undefined;
-  }
-
   return (
     <>
       <Group gap="xs" align="center">
