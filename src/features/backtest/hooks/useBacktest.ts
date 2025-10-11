@@ -11,28 +11,39 @@ export interface BacktestResult {
 export const fetchBacktestData = async (
   ticker: string,
   timeframe: string,
+  strategy: string,
   apiUrl: string
 ): Promise<BacktestResult[]> => {
-  const body = { ticker, timeframe };
+  // Build URL with strategy as query parameter
+  const url = new URL(`${apiUrl}/backtest/${ticker}/${timeframe}/`);
+  url.searchParams.append("strategy", strategy);
 
-  const res = await fetch(`${apiUrl}/backtest/${ticker}/${timeframe}/`, {
-    method: "POST",
+  const res = await fetch(url.toString(), {
+    method: "GET",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
   });
+
+  console.log("Fetch backtest response:", res);
 
   if (!res.ok) throw new Error("Failed to fetch backtest data");
 
   const data: BacktestResult[] = await res.json();
-  return data.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+  return data.sort(
+    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+  );
 };
 
 // React Query hook
-export const useBacktestData = (ticker: string, timeframe: string, apiUrl: string) => {
+export const useBacktestData = (
+  ticker: string,
+  timeframe: string,
+  strategy: string,
+  apiUrl: string
+) => {
   const query = useQuery<BacktestResult[], Error>({
-    queryKey: ["backtest", ticker, timeframe],
-    queryFn: () => fetchBacktestData(ticker, timeframe, apiUrl),
-    enabled: !!ticker && !!timeframe,
+    queryKey: ["backtest", ticker, timeframe, strategy],
+    queryFn: () => fetchBacktestData(ticker, timeframe, strategy, apiUrl),
+    enabled: !!ticker && !!timeframe && !!strategy,
   });
 
   const noData = !query.isLoading && !query.error && (query.data?.length ?? 0) === 0;

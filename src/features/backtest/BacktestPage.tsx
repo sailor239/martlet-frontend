@@ -1,22 +1,43 @@
 import { useState } from "react";
-import { MantineProvider, Button, Card, Loader, Center, Group, Select, Text } from "@mantine/core";
+import { MantineProvider, Button, Card, Loader, Center, Group, Select, Text, Tooltip } from "@mantine/core";
 import { BacktestChart, useBacktestData } from "../backtest";
 import { notifications } from "@mantine/notifications";
+
+interface StrategyOption {
+  value: string;
+  label: string;
+  description: string;
+}
 
 export const BacktestPage: React.FC<{ apiUrl?: string }> = ({
   apiUrl = import.meta.env.VITE_API_URL,
 }) => {
   const [ticker, setTicker] = useState("xauusd");
   const [timeframe, setTimeframe] = useState("5min");
+  const [strategy, setStrategy] = useState("previous_day_breakout");
   const [isRunning, setIsRunning] = useState(false);
+
+  const strategies: StrategyOption[] = [
+    {
+      value: "previous_day_breakout",
+      label: "Previous Day Breakout",
+      description: "Trades momentum when price breaks the prior day's high or low.",
+    },
+    {
+      value: "ema_respect_follow",
+      label: "EMA Respect Follow",
+      description:
+        "After a price breaks above or below the EMA, wait for a retrace that respects it as support or resistance, then follow the breakout trend.",
+    },
+  ];
 
   const runBacktest = async () => {
     setIsRunning(true);
     try {
-      const res = await fetch(`${apiUrl}/backtest/`, {
+      const res = await fetch(`${apiUrl}/trigger_backtest_run/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ticker, timeframe }),
+        body: JSON.stringify({ ticker, timeframe, strategy }),
       });
 
       if (!res.ok) {
@@ -43,6 +64,7 @@ export const BacktestPage: React.FC<{ apiUrl?: string }> = ({
   const { data: results = [], isLoading, error, noData } = useBacktestData(
     ticker,
     timeframe,
+    strategy,
     apiUrl
   );
 
@@ -51,9 +73,33 @@ export const BacktestPage: React.FC<{ apiUrl?: string }> = ({
       <Card shadow="sm" p="lg" radius="md" style={{ width: "100%", height: "80vh", minHeight: 600, display: "flex", flexDirection: "column" }}>
         <Group mb="md" gap="md" align="center">
           <Text size="sm" fw={500}>Ticker:</Text>
-          <Select value={ticker} onChange={(val) => val && setTicker(val)} data={[{ value: "xauusd", label: "XAUUSD" }]} w={120} />
+          <Select
+            value={ticker} onChange={(val) => val && setTicker(val)}
+            data={[{ value: "xauusd", label: "XAUUSD" }]}
+            w={120}
+          />
           <Text size="sm" fw={500}>Timeframe:</Text>
-          <Select value={timeframe} onChange={(val) => val && setTimeframe(val)} data={[{ value: "5min", label: "5 Minutes" }]} w={120} />
+          <Select
+            value={timeframe}
+            onChange={(val) => val && setTimeframe(val)}
+            data={[{ value: "5min", label: "5 Minutes" }]}
+            w={120}
+          />
+          <Text size="sm" fw={500}>Strategy:</Text>
+          <Select
+            value={strategy}
+            onChange={(val) => val && setStrategy(val)}
+            data={strategies}
+            w={200}
+            renderOption={({ option }) => {
+              const opt = option as StrategyOption;
+              return (
+                <Tooltip label={opt.description} position="right" withArrow>
+                  <div>{opt.label}</div>
+                </Tooltip>
+              );
+            }}
+          />
           <Button onClick={runBacktest} disabled={isRunning}>
             {isRunning ? <Loader size="xs" /> : "Run Backtest"}
           </Button>
