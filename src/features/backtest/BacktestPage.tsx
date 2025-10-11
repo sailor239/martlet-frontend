@@ -37,6 +37,12 @@ export const BacktestPage: React.FC<{ apiUrl?: string }> = ({
       disabled: true,
     },
   ];
+  const tickers = [
+    { value: "xauusd", label: "XAUUSD" }
+  ];
+  const timeframes = [
+    { value: "5min", label: "5 Minutes" }
+  ];
 
   const runBacktest = async () => {
     setIsRunning(true);
@@ -74,19 +80,6 @@ export const BacktestPage: React.FC<{ apiUrl?: string }> = ({
     <MantineProvider>
       <Card shadow="sm" p="lg" radius="md" style={{ width: "100%", height: "80vh", minHeight: 600, display: "flex", flexDirection: "column" }}>
         <Group mb="md" gap="md" align="center">
-          <Text size="sm" fw={500}>Ticker:</Text>
-          <Select
-            value={ticker} onChange={(val) => val && setTicker(val)}
-            data={[{ value: "xauusd", label: "XAUUSD" }]}
-            w={120}
-          />
-          <Text size="sm" fw={500}>Timeframe:</Text>
-          <Select
-            value={timeframe}
-            onChange={(val) => val && setTimeframe(val)}
-            data={[{ value: "5min", label: "5 Minutes" }]}
-            w={120}
-          />
           <Text size="sm" fw={500}>Strategy:</Text>
           <Select
             value={strategy}
@@ -102,6 +95,19 @@ export const BacktestPage: React.FC<{ apiUrl?: string }> = ({
               );
             }}
           />
+          <Text size="sm" fw={500}>Ticker:</Text>
+          <Select
+            value={ticker} onChange={(val) => val && setTicker(val)}
+            data={tickers}
+            w={120}
+          />
+          <Text size="sm" fw={500}>Timeframe:</Text>
+          <Select
+            value={timeframe}
+            onChange={(val) => val && setTimeframe(val)}
+            data={timeframes}
+            w={120}
+          />
           <Button onClick={runBacktest} disabled={isRunning}>
             {isRunning ? <Loader size="xs" /> : "Run Backtest"}
           </Button>
@@ -114,7 +120,7 @@ export const BacktestPage: React.FC<{ apiUrl?: string }> = ({
         )}
 
         {error && <Text c="red">{error.message}</Text>}
-        {noData && <Text>No backtest data for selected ticker/timeframe</Text>}
+        {noData && <Text>No backtest results for the selected strategy/ticker/timeframe</Text>}
 
         {!isLoading && !error && results.length > 0 && <BacktestChart results={results} />}
       </Card>
