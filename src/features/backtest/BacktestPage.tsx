@@ -7,6 +7,7 @@ interface StrategyOption {
   value: string;
   label: string;
   description: string;
+  disabled?: boolean;
 }
 
 export const BacktestPage: React.FC<{ apiUrl?: string }> = ({
@@ -21,13 +22,19 @@ export const BacktestPage: React.FC<{ apiUrl?: string }> = ({
     {
       value: "previous_day_breakout",
       label: "Previous Day Breakout",
-      description: "Trades momentum when price breaks the prior day's high or low.",
+      description: "Trades momentum on a breakout of the prior day's high or low.",
+    },
+    {
+      value: "compression_breakout_scalp",
+      label: "Compression Breakout Scalp",
+      description: "Quick scalp on prior day's range breakout, only if it’s contained within the day-before’s range.",
     },
     {
       value: "ema_respect_follow",
       label: "EMA Respect Follow",
       description:
-        "After a price breaks above or below the EMA, wait for a retrace that respects it as support or resistance, then follow the breakout trend.",
+        "Quick scalp following EMA breakout, with EMA acting as confirmed support or resistance.",
+      disabled: true,
     },
   ];
 
@@ -61,12 +68,7 @@ export const BacktestPage: React.FC<{ apiUrl?: string }> = ({
     }
   };
 
-  const { data: results = [], isLoading, error, noData } = useBacktestData(
-    ticker,
-    timeframe,
-    strategy,
-    apiUrl
-  );
+  const { data: results = [], isLoading, error, noData } = useBacktestData(strategy, ticker, timeframe, apiUrl);
 
   return (
     <MantineProvider>
@@ -90,7 +92,7 @@ export const BacktestPage: React.FC<{ apiUrl?: string }> = ({
             value={strategy}
             onChange={(val) => val && setStrategy(val)}
             data={strategies}
-            w={200}
+            w={280}
             renderOption={({ option }) => {
               const opt = option as StrategyOption;
               return (
