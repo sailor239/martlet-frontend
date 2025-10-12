@@ -12,6 +12,7 @@ interface Trade {
   ticker: string;
   direction: string;
   size: number;
+  type: string;
   entry_price: number;
   exit_price?: number;
   entry_time: string;
@@ -61,7 +62,7 @@ export const TradeList: React.FC<TradeListProps> = ({ trades }) => {
                 </Text>
                 <Text size="sm">
                   Entry: {trade.entry_price} | Exit: {trade.exit_price ?? "-"} | P/L:{" "}
-                  {trade.pnl ?? "-"}
+                  {trade.pnl ?? "-"} | Type: {toProperCase(trade.type)}
                 </Text>
               </div>
               <Button

@@ -80,6 +80,7 @@ export const IntradayPage: React.FC<{ apiUrl?: string }> = ({
       entry_time: trade.entry_time ? new Date(trade.entry_time).toISOString() : undefined,
       exit_time: trade.exit_time ? new Date(trade.exit_time).toISOString() : undefined,
       ticker: ticker.toLowerCase(),
+      type: "real",
     };
 
     // Convert times to local Date for frontend display

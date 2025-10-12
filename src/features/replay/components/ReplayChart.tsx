@@ -174,10 +174,10 @@ export default function ReplayChart({ candles, trades = [], cumulativePL = [], o
         layout={{
           autosize: true,
           margin: { l: 160, r: 10, t: 40, b: 40 },
-          grid: { rows: 2, columns: 1, roworder: "top to bottom" },
+          grid: { rows: 2, columns: 1, roworder: "top to bottom", row_heights: [0.9, 0.1], },
           xaxis: { rangeslider: { visible: false }, type: "date" },
-          yaxis: { title: "Price" },
-          yaxis2: { title: "Cumulative P/L" },
+          yaxis: { title: "Price", domain: [0.3, 1], },
+          yaxis2: { title: "Cumulative P/L", domain: [0, 0.3], },
           legend: {
             orientation: "h", // horizontal layout
             yanchor: "top",

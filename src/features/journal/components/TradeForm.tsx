@@ -28,6 +28,7 @@ export const TradeForm: React.FC = () => {
       ticker: ticker.toLowerCase(),
       direction: direction.toLowerCase(),
       size: Number(size),                     // always a number
+      type: "real",
       entry_price: Number(entryPrice),        // always a number
       exit_price: exitPrice === "" ? null : Number(exitPrice),  // optional
       entry_time: entryTime.toISOString(),    // always string ISO
@@ -43,7 +44,6 @@ export const TradeForm: React.FC = () => {
         onChange={(e) => setTicker(e.currentTarget.value)}
         required
       />
-
       <Select
         label="Direction"
         value={direction}
@@ -55,7 +55,6 @@ export const TradeForm: React.FC = () => {
         required
         mt="sm"
       />
-
       <NumberInput
         label="Size"
         value={size}
@@ -63,7 +62,6 @@ export const TradeForm: React.FC = () => {
         step={0.01}
         min={0.01}
       />
-
       <NumberInput
         label="Entry Price"
         value={entryPrice}
@@ -71,7 +69,6 @@ export const TradeForm: React.FC = () => {
         required
         mt="sm"
       />
-
       <NumberInput
         label="Exit Price"
         value={exitPrice}
@@ -79,7 +76,6 @@ export const TradeForm: React.FC = () => {
         required
         mt="sm"
       />
-
       <DateTimePicker
         label="Entry Time"
         value={entryTime}
@@ -96,7 +92,6 @@ export const TradeForm: React.FC = () => {
         required
         mt="sm"
       />
-
       <DateTimePicker
         label="Exit Time"
         value={exitTime}
@@ -116,7 +111,7 @@ export const TradeForm: React.FC = () => {
 
       <Group justify="flex-end" mt="md">
         <Button type="submit" loading={addTrade.isPending}>
-          Save Trade
+          Submit
         </Button>
       </Group>
     </form>

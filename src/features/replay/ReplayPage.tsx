@@ -12,7 +12,7 @@ export const ReplayPage: React.FC<{ apiUrl?: string }> = ({
   const [timeframe, setTimeframe] = useState("5min");
   const [tradingDate, setTradingDate] = useState<Date | null>(new Date());
 
-  const { data: candles = [], isLoading, error, noData, refetch } = useIntradayData(
+  const { data: candles = [], isLoading, error, noData } = useIntradayData(
     ticker,
     timeframe,
     tradingDate,
@@ -22,7 +22,7 @@ export const ReplayPage: React.FC<{ apiUrl?: string }> = ({
   // ✅ Replay states
   const [visibleCount, setVisibleCount] = useState(0);
 
-  const handleReplay = () => {
+  const clearChart = () => {
     setVisibleCount(0); // reset chart
   };
 
@@ -59,31 +59,6 @@ export const ReplayPage: React.FC<{ apiUrl?: string }> = ({
     });
   }, [backendTrades]);
 
-  useEffect(() => {
-    if (!candles.length) return;
-
-    const timeframeSeconds = 5 * 60; // 5 minutes in seconds
-    let lastTimestamp = candles[candles.length - 1].timestamp_sgt;
-
-    const interval = setInterval(async () => {
-      const now = new Date();
-      const lastCandleTime = new Date(lastTimestamp);
-      const elapsed = Math.floor((now.getTime() - lastCandleTime.getTime()) / 1000);
-      const remaining = timeframeSeconds - (elapsed % timeframeSeconds);
-
-      // Wait until after candle closes
-      if (remaining <= 0) {
-        const newCandles = await refetch();
-        const newestTimestamp = newCandles.data?.[newCandles.data.length - 1]?.timestamp_sgt;
-        if (newestTimestamp && newestTimestamp !== lastTimestamp) {
-          lastTimestamp = newestTimestamp;
-        }
-      }
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [candles, refetch]);
-
   // 1️⃣ Backend save function
   const saveTrade = async (trade: any) => {
     // Convert times to UTC ISO string for backend
@@ -92,6 +67,7 @@ export const ReplayPage: React.FC<{ apiUrl?: string }> = ({
       entry_time: trade.entry_time ? new Date(trade.entry_time).toISOString() : undefined,
       exit_time: trade.exit_time ? new Date(trade.exit_time).toISOString() : undefined,
       ticker: ticker.toLowerCase(),
+      type: "simulated",
     };
 
     // Convert times to local Date for frontend display
@@ -148,14 +124,9 @@ export const ReplayPage: React.FC<{ apiUrl?: string }> = ({
     }
   };
 
-  // ✅ Cumulative P/L calculation based on visible candles
-  // ✅ Realized cumulative P/L — correctly constant after exits
+  // Realized cumulative P/L
   const cumulativePL = useMemo(() => {
     if (!visibleCandles.length) return [];
-
-    // const lastVisibleTime = new Date(
-    //   visibleCandles[visibleCandles.length - 1].timestamp_sgt
-    // ).getTime();
 
     // Sort trades by exit time
     const exitedTrades = trades
@@ -231,8 +202,8 @@ export const ReplayPage: React.FC<{ apiUrl?: string }> = ({
 
         {/* 🟢 Replay Controls */}
         <Group mb="sm" gap="md" align="center">
-          <Button color="blue" onClick={handleReplay}>
-            Replay
+          <Button color="blue" onClick={clearChart} disabled={visibleCount === 0}>
+            Clear
           </Button>
           <Button
             color="teal"
