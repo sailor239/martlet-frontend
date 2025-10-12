@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from "react";
 import { MantineProvider, Button, Card, Text, Loader, Center, Group, Select } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import ReplayChart from "./components/ReplayChart";
-import TimezoneClock from "../../components/ui/TimezoneClock";
 import { useIntradayData, useTrades } from "../replay";
 import { showNotification } from '@mantine/notifications';
 
@@ -228,7 +227,6 @@ export const ReplayPage: React.FC<{ apiUrl?: string }> = ({
                 })
               : ""}
           </Text>
-          <TimezoneClock />
         </Group>
 
         {/* 🟢 Replay Controls */}
