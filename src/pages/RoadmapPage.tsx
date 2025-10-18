@@ -16,6 +16,8 @@ const roadmapData: RoadmapItem[] = [
   { title: "Add multiple trading strategies to backtest", status: "completed" },
   { title: "Allow user to set different types of alerts", status: "planned" },
   { title: "Show the status of market: open or closed", status: "planned" },
+  { title: "Add last updated time on the intraday page for the candlestick chart", status: "planned" },
+  { title: "Add last run time on the backtest page for each strategy", status: "planned" },
 ];
 
 const statusColor = {

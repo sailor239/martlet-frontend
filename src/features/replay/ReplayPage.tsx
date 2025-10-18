@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo } from "react";
 import { MantineProvider, Button, Card, Text, Loader, Center, Group, Select } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import ReplayChart from "./components/ReplayChart";
-import { useIntradayData, useTrades } from "../replay";
+import { useIntradayData } from "../replay";
+import { useTrades } from "../../hooks";
 import { showNotification } from '@mantine/notifications';
 
 export const ReplayPage: React.FC<{ apiUrl?: string }> = ({
@@ -32,7 +33,8 @@ export const ReplayPage: React.FC<{ apiUrl?: string }> = ({
 
   const visibleCandles = candles.slice(0, visibleCount);
 
-  const { data: backendTrades = [] } = useTrades(ticker, tradingDate, apiUrl);
+  const { data: backendTrades = [] } = useTrades("simulated", ticker, tradingDate, apiUrl);
+  
   const [trades, setTrades] = useState(
     backendTrades.map((t) => ({
       ...t,
