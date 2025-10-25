@@ -47,7 +47,7 @@ export const BacktestPage: React.FC<{ apiUrl?: string }> = ({
   const runBacktest = async () => {
     setIsRunning(true);
     try {
-      const res = await fetch(`${apiUrl}/trigger_backtest_run/`, {
+      const res = await fetch(`${apiUrl}/backtest/run/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ strategy, ticker, timeframe }),

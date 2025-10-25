@@ -14,7 +14,7 @@ export const fetchBacktestData = async (
   timeframe: string,
   apiUrl: string
 ): Promise<BacktestResult[]> => {
-  const url = new URL(`${apiUrl}/backtest-results/`);
+  const url = new URL(`${apiUrl}/backtest/results/`);
   url.searchParams.set("strategy", strategy);
   url.searchParams.set("ticker", ticker);
   url.searchParams.set("timeframe", timeframe);
