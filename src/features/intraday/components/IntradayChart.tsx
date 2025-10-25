@@ -152,7 +152,7 @@ export default function IntradayChart({ candles, trades = [], onTradeMarked }: P
             type: "candlestick",
             name: "Price",
             increasing: { line: { color: "green", width: 1.5 }, fillcolor: "white" },
-            decreasing: { line: { color: "red", width: 1.5 }, fillcolor: "red" },
+            decreasing: { line: { color: "red", width: 1.5 }, fillcolor: "white" },
           },
           {
             x: candles.filter((c) => c.ema20 != null).map((c) => c.timestamp_sgt),
