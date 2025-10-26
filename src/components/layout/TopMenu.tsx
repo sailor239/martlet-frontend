@@ -1,7 +1,8 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { Paper, Group, Container, Menu, Text, UnstyledButton } from "@mantine/core";
+import { Button, Paper, Group, Container, Menu, Text, UnstyledButton } from "@mantine/core";
 import { IconChevronDown } from "@tabler/icons-react";
 import { useState } from "react";
+import { useAuth } from "../../hooks/useAuth";
 
 interface Page {
   label: string;
@@ -14,6 +15,7 @@ export default function TopMenu() {
   const navigate = useNavigate();
   const location = useLocation();
   const [hovered, setHovered] = useState<string | null>(null);
+  const { token, logout } = useAuth(); // ✅ useAuth context
 
   const path = location.pathname;
   const activePage = path === "/" ? "home" : path.includes("about") ? "about" : "";
@@ -28,14 +30,8 @@ export default function TopMenu() {
       ],
       dropdownColor: "#334155",
     },
-    {
-      label: "About",
-      path: "/about",
-    },
-    {
-      label: "Roadmap",
-      path: "/roadmap",
-    },
+    { label: "About", path: "/about" },
+    { label: "Roadmap", path: "/roadmap" },
   ];
 
   return (
@@ -53,8 +49,17 @@ export default function TopMenu() {
         alignItems: "stretch",
       }}
     >
-      <Container style={{ display: "flex", alignItems: "stretch", height: "100%" }}>
-        <Group style={{ height: "100%", position: "relative" }}>
+      <Container
+    style={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between", // ✅ Push auth buttons to the right
+      height: "100%",
+      width: "100%",
+    }}
+  >
+        <Group style={{ height: "100%", position: "relative", flex: 1 }}>
+          {/* Pages */}
           {pages.map((page) => {
             const isActive = activePage === page.label.toLowerCase();
             const hasDropdown = page.subItems && page.subItems.length > 0;
@@ -62,7 +67,6 @@ export default function TopMenu() {
             if (hasDropdown) {
               return (
                 <div key={page.label} style={{ display: "flex", height: "100%" }}>
-                  {/* Main button */}
                   <div
                     onClick={() => navigate(page.path)}
                     onMouseEnter={() => setHovered(page.label)}
@@ -71,7 +75,7 @@ export default function TopMenu() {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      height: "100%",   // ✅ ensures underline at bottom
+                      height: "100%",
                       padding: "0 20px",
                       minWidth: 120,
                       cursor: "pointer",
@@ -99,7 +103,6 @@ export default function TopMenu() {
                     />
                   </div>
 
-                  {/* Triangle dropdown trigger */}
                   <Menu withinPortal shadow="md" width={220}>
                     <Menu.Target>
                       <UnstyledButton
@@ -107,12 +110,11 @@ export default function TopMenu() {
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          height: "100%", // ✅ same height
+                          height: "100%",
                           padding: "0 10px",
                           cursor: "pointer",
                           color: "#fff",
                           background: "transparent",
-                          transition: "background 0.2s, transform 0.2s",
                           borderRadius: 4,
                         }}
                         onMouseEnter={(e) =>
@@ -136,7 +138,7 @@ export default function TopMenu() {
                         <Menu.Item
                           key={sub.label}
                           onClick={sub.action}
-                          style={{ color: "#fff", transition: "background 0.2s" }}
+                          style={{ color: "#fff" }}
                           onMouseEnter={(e) =>
                             (e.currentTarget.style.background = "#64748b")
                           }
@@ -153,7 +155,6 @@ export default function TopMenu() {
               );
             }
 
-            // Pages without dropdown
             return (
               <div
                 key={page.label}
@@ -164,7 +165,7 @@ export default function TopMenu() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  height: "100%",  // ✅ fixes underline
+                  height: "100%",
                   padding: "0 20px",
                   minWidth: 120,
                   cursor: "pointer",
@@ -193,6 +194,33 @@ export default function TopMenu() {
               </div>
             );
           })}
+        </Group>
+
+        {/* Auth buttons */}
+        <Group style={{ height: "100%", alignItems: "center" }}>
+          {token ? (
+            <Button color="red" variant="outline" size="sm" onClick={logout}>
+              Logout
+            </Button>
+          ) : (
+            <>
+              <Button
+                variant="outline"
+                color="blue"
+                size="sm"
+                onClick={() => navigate("/login")}
+              >
+                Login
+              </Button>
+              <Button
+                color="blue"
+                size="sm"
+                onClick={() => navigate("/register")}
+              >
+                Register
+              </Button>
+            </>
+          )}
         </Group>
       </Container>
     </Paper>
