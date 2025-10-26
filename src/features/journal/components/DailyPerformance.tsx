@@ -1,10 +1,8 @@
 import React, { useState, useMemo } from "react";
 import {
   Card,
-  Title,
   Group,
   Select,
-  Loader,
   Center,
   Text,
   SimpleGrid,
@@ -22,10 +20,10 @@ export const DailyPerformance: React.FC<DailyPerformanceProps> = ({ trades }) =>
   const [selectedTicker, setSelectedTicker] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
-  const availableTickers = useMemo(
-    () => Array.from(new Set(trades.map(t => t.ticker))).sort(),
-    [trades]
-  );
+//   const availableTickers = useMemo(
+//     () => Array.from(new Set(trades.map(t => t.ticker))).sort(),
+//     [trades]
+//   );
 
   // Filter trades for the selected day/ticker
   const filteredTrades = useMemo(() => {
